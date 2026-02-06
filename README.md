@@ -1,6 +1,6 @@
 # DoBot
 My try at creating Jarvis
-
+```txt
 ┌──────────────────────────────┐
 │           Usuario            │
 └───────────────┬──────────────┘
@@ -41,3 +41,4 @@ My try at creating Jarvis
                     ┌─────────────────────┐
                     │ 6. Result Formatter │
                     └─────────────────────┘
+```
