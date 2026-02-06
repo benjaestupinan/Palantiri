@@ -1,4 +1,4 @@
-# DoBot
+# BotFoam
 My attempt at creating Jarvis
 ```txt
 ┌──────────────────────────────┐
