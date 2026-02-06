@@ -1,13 +1,20 @@
+import sys
+import os
+
+# Añade la carpeta raíz del proyecto a sys.path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from JOB_CATALOG import JOB_CATALOG
 import environ
 import requests
 
 from JOB_CATALOG import JOB_CATALOG
 
-env = environ.Env(
+#env = environ.Env(
     # set casting, default value
-    DEBUG=(bool, False)
-)
-environ.Env.read_env()
+#    DEBUG=(bool, False)
+#)
+#environ.Env.read_env()
 
 user_msg = str(input("msg: "))
 
@@ -117,10 +124,10 @@ data = {
     #"reasoning": {"enabled": True}
 }
 
-headers = {
-    'Content-Type': 'application/json',
-    'Authorization': f"Bearer {env("API_KEY")}"
-}
+#headers = {
+#    'Content-Type': 'application/json',
+#    'Authorization': f"Bearer {env("API_KEY")}"
+#}
 
 # A POST request to the API
 #response = requests.post(
