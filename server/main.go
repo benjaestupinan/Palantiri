@@ -18,9 +18,9 @@ func main() {
 	// log.Println("Go service running on :8081")
 	// log.Fatal(http.ListenAndServe(":8081", mux))
 
-	jobID := "get_system_time"
+	jobID := "echo"
 	params := map[string]any{
-		
+		"message": "hola silvanita",
 	}
 
 	job := jobs.Job{
@@ -33,7 +33,7 @@ func main() {
 	if err != nil {
 		// job doesnt exist in the router
 		fmt.Println("--- Routing ---")
-		fmt.Println("Job doesnt existe in the router")
+		fmt.Println("Job doesnt exist in the router")
 		fmt.Println("---------------")
 		return
 	}
