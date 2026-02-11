@@ -1,10 +1,4 @@
-import os
-import sys
-
-# Añade la carpeta raíz del proyecto a sys.path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from JOB_CATALOG import JOB_CATALOG
+from intent_router_module.JOB_CATALOG import JOB_CATALOG
 
 
 # Recursive function to validate format of given job
@@ -55,7 +49,7 @@ def validate_job(job):
 print(validate_job({
   "job_id": "delay_job",
   "parameters": {
-    "delay_seconds": "900",
+    "delay_seconds": 900,
     "job": {
       "job_id": "get_system_time",
       "parameters": {}

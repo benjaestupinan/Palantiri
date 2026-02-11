@@ -1,14 +1,6 @@
-import sys
-import os
-
-# Añade la carpeta raíz del proyecto a sys.path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from JOB_CATALOG import JOB_CATALOG
+from intent_router_module.JOB_CATALOG import JOB_CATALOG
 import environ
 import requests
-
-from JOB_CATALOG import JOB_CATALOG
 
 #env = environ.Env(
     # set casting, default value
@@ -139,3 +131,4 @@ data = {
 # Print the response
 # print(response.json())
 print(msg)
+
