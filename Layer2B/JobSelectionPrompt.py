@@ -1,17 +1,6 @@
 from intent_router_module.JOB_CATALOG import JOB_CATALOG
-import environ
-import requests
-
-#env = environ.Env(
-    # set casting, default value
-#    DEBUG=(bool, False)
-#)
-#environ.Env.read_env()
 
 user_msg = str(input("msg: "))
-
-# The API endpoint
-url = "http://192.168.100.125:11434/api/generate"
 
 msg = f"""
 Eres un componente interno del sistema.
@@ -105,30 +94,6 @@ RECORDATORIO FINAL:
 Si no puedes seleccionar un job cumpliendo TODAS las reglas anteriores,
 responde con job_id = null.
 """
-# Data to be sent
-data = {
-    "model": "qwen2.5:3b-instruct",
-    "messages": [
-        {
-            "role": "user",
-            "content": msg
-        }],
-    #"reasoning": {"enabled": True}
-}
 
-#headers = {
-#    'Content-Type': 'application/json',
-#    'Authorization': f"Bearer {env("API_KEY")}"
-#}
-
-# A POST request to the API
-#response = requests.post(
-#    url,
-#    headers=headers,
-#    json=data
-#)
-
-# Print the response
-# print(response.json())
 print(msg)
 
