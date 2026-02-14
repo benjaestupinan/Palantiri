@@ -1,0 +1,53 @@
+ASISTENTE VIRTUAL - FLUJO GENERAL DEL SISTEMA
+
+1.  Usuario (User) | v
+
+2.  http_server.py
+
+    -   Recibe la request del usuario.
+    -   Envía el texto al módulo cognitivo para determinar la intención.
+
+3.  LLM (Ollama - modelo de intención, ej: Qwen 2.5 3B)
+
+    -   Clasifica la intención.
+    -   Devuelve:
+        -   intent (COGNITIVE_REQUEST | COGNITIVE_REQUEST_WITH_EXTRA_DATA | SYSTEM_ACTION)
+
+4.  Decisión basada en intención:
+
+    A)  Si NO requiere acción del sistema:
+        -   Se envía como “cognitive request” a la LLM conversacional.
+        -   LLM genera respuesta natural.
+        -   http_server.py devuelve la respuesta al usuario.
+
+    B)  Si requiere acción del sistema (Job):
+        -   Se construye un objeto “Job?” con:
+            -   job_id
+            -   parámetros
+        -   Se envía a validator.py
+
+5.  validator.py
+
+    -   Valida:
+        -   esquema (schema) del job
+        -   tipos de parámetros
+        -   políticas de seguridad
+    -   Resultado: ✓ Válido -> pasa a Job Executor ✗ Inválido -> retry
+        (opcionalmente reintentar con LLM)
+
+6.  Job Executor
+
+    -   Ejecuta código determinista (NO IA).
+    -   No tiene acceso directo a LLM.
+    -   Devuelve resultado estructurado.
+
+7.  Resultado
+
+    -   El resultado puede:
+        a)  Pasar por LLM junto con el input del usuario para generar una respuesta en lenguaje natural
+        b)  Volver la respuesta generada al usuario
+
+Principios importantes: - La LLM solo interpreta intención y genera
+texto. - Toda acción del sistema pasa por validación explícita. - El
+executor es completamente determinista. - Conversación y ejecución son
+flujos separados.
