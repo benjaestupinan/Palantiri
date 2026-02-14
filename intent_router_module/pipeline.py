@@ -1,25 +1,33 @@
+import json
 import requests
-import IntentRouterPrompt
-import JobSelectionPrompt
-import validator
+
+import IntentRouterPrompt as IntentRouterPrompt
+import JobSelectionPrompt as JobSelectionPrompt
+import PromptLLM as PromptLLM
+import RedactResponsePrompt as RedactResponsePrompt
+import validator as validator
 
 
 def process_msg(user_msg):
     #step 1 resolve intent
     intent_prompt = IntentRouterPrompt.get_intent_prompt(user_msg)
-    intent = ask_qwen_llm(intent_prompt)
+    intent_raw = PromptLLM.ask_qwen(intent_prompt)
+
+    intent_obj = json.loads(intent_raw)
+    intent = intent_obj["category"]
 
     #step 2 cases:
             
         # COGNITIVE_REQUEST
-    if intent_prompt == "COGNITIVE_REQUEST":
+    if intent == "COGNITIVE_REQUEST":
         #step 3a handle user_msg with chatty LLM
-        return "Haven't imlemented redirect to chatty llm conversation yet"
+        return PromptLLM.ask_chatty(user_msg)
 
             # COGNITIVE_REQUEST_WITH_EXTRA_DATA or SYSTEM_ACTION
-    elif intent_prompt in [ "COGNITIVE_REQUEST_WITH_EXTRA_DATA", "SYSTEM_ACTION" ]:
+    elif intent in [ "COGNITIVE_REQUEST_WITH_EXTRA_DATA", "SYSTEM_ACTION" ]:
         #step 3b resolve select job
-        job = JobSelectionPrompt.get_job_selection_prompt(user_msg)
+        job_prompt = JobSelectionPrompt.get_job_selection_prompt(user_msg)
+        job = PromptLLM.ask_qwen(job_prompt)
 
         #step 4 validate job structure and parameters
         valid, msg = validator.validate_job(job) 
@@ -28,11 +36,16 @@ def process_msg(user_msg):
             return f"Job invalido, err: {msg}"        
 
         #step 5 send job to job_execution_service via http
-        # build body
+        # bintent_router_moduleuild body
+        return "Job execution connection not yet implemented"
         response = requests.get("go http server")
 
         #step 6 send response to chatty LLM along with initial input to generate a natural language response
-        ret_msg = ask_chatty_llm(user_msg, response)
+        ret_msg_prompt = RedactResponsePrompt.get_response_message_prompt(user_msg, response)
+        ret_msg = PromptLLM.ask_chatty(ret_msg_prompt)
 
         #step 7 return final response
         return ret_msg
+
+msg = str(input("msg: "))
+print(process_msg(msg))

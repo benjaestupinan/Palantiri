@@ -45,16 +45,16 @@ def validate_job(job):
 
     return True, "formato valido"
 
-
-print(validate_job({
-  "job_id": "delay_job",
-  "parameters": {
-    "delay_seconds": 900,
-    "job": {
-      "job_id": "get_system_time",
-      "parameters": {}
-    }
-  },
-  "confidence": 0.98,
-  "explanation": "requisitos de tiempo especificados y job de retardo definido"
-}))
+if __name__ == '__main__':
+    print(validate_job({
+      "job_id": "delay_job",
+      "parameters": {
+        "delay_seconds": 900,
+        "job": {
+          "job_id": "get_system_time",
+          "parameters": {}
+        }
+      },
+      "confidence": 0.98,
+      "explanation": "requisitos de tiempo especificados y job de retardo definido"
+    }))
