@@ -22,37 +22,37 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fn, err := jobs.JobRouter(job.JobID)
 	if err != nil {
 		// job doesnt exist in the router
-		fmt.Println("--- Routing ---")
-		fmt.Println("Job doesnt exist in the router")
-		fmt.Println("---------------")
+		w.Write([]byte("--- Routing ---\n"))
+		w.Write([]byte("Job doesnt exist in the router\n"))
+		w.Write([]byte("---------------\n"))
 		return
 	}
 
 	exec, err := fn(job)
 
 	if err != nil {
-		fmt.Println("--- Error fuera de flujo ---")
-		fmt.Println(err)
+		w.Write([]byte("--- Error fuera de flujo ---\n"))
+		w.Write([]byte(err.Error()))
 		http.Error(w, "internal error", http.StatusInternalServerError)
-		fmt.Println("----------------------------")
+		w.Write([]byte("----------------------------\n"))
 	}
 
 	if exec.Failed {
 		// error while execution job
-		fmt.Println("--- Execution ---")
-		fmt.Printf("Failed: %t\n", exec.Failed)
-		fmt.Printf("Error: %s\n", exec.Msg)
+		w.Write([]byte("--- Execution ---\n"))
+		w.Write(fmt.Appendf(nil, "Failed: %t\n", exec.Failed))
+		w.Write(fmt.Appendf(nil, "Error: %s\n", exec.Msg))
 		http.Error(w, exec.Msg, http.StatusBadRequest)
-		fmt.Println("-----------------")
+		w.Write([]byte("-----------------\n"))
 
 		return
 	}
 
-	fmt.Println("+++ Execution +++")
-	fmt.Printf("Failed: %t\n", exec.Failed)
-	fmt.Printf("Message: %s\n", exec.Msg)
-	fmt.Printf("Output: %s\n", exec.Output)
-	fmt.Println("+++++++++++++++++")
+	w.Write([]byte("+++ Execution +++\n"))
+	w.Write(fmt.Appendf(nil, "Failed: %t\n", exec.Failed))
+	w.Write(fmt.Appendf(nil, "Message: %s\n", exec.Msg))
+	w.Write(fmt.Appendf(nil, "Output: %s\n", exec.Output))
+	w.Write([]byte("+++++++++++++++++\n"))
 }
 
 func main() {
