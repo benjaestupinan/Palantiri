@@ -1,4 +1,4 @@
-from intent_router_module.JOB_CATALOG import JOB_CATALOG
+from JOB_CATALOG import JOB_CATALOG
 
 
 # Recursive function to validate format of given job
