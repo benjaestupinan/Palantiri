@@ -7,24 +7,15 @@ JOB_CATALOG = {
         },
     },
 
-    "add_numbers": {
-        "job_id": "add_numbers",
-        "description": "Suma dos números reales y devuelve el resultado.",
-        "parameters": {
-            "a": {"type": "number", "description": "Primer número."},
-            "b": {"type": "number", "description": "Segundo número."},
-        },
-    },
-
-    "get_system_time": {
-        "job_id": "get_system_time",
+    "get_system_date_and_time": {
+        "job_id": "get_system_date_and_time",
         "description": "Obtiene la fecha y hora actual del sistema.",
         "parameters": {},
     },
-    
-    "delay_job": {
-        "job_id": "delay_job",
-        "description": "Ejecuta otro job después de un retraso especificado.",
-        "parameters": {"delay_seconds": {"type": "number"}, "job": {"type": "job"}},
-    },
+    #
+    # "delay_job": {
+    #     "job_id": "delay_job",
+    #     "description": "Ejecuta otro job después de un retraso especificado.",
+    #     "parameters": {"delay_seconds": {"type": "number"}, "job": {"type": "job"}},
+    # },
 }
