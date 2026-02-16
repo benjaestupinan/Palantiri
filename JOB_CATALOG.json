@@ -4,18 +4,21 @@
         "description": "Devuelve exactamente el mensaje entregado, sin modificaciones.",
         "parameters": {
             "message": {"type": "string", "description": "Texto a devolver tal cual."}
-        },
+        }
     },
 
-    "get_system_time": {
-        "job_id": "get_system_time",
+    "get_system_date_and_time": {
+        "job_id": "get_system_date_and_time",
         "description": "Obtiene la fecha y hora actual del sistema.",
-        "parameters": {},
+        "parameters": {}
     },
     
     "delay_job": {
         "job_id": "delay_job",
         "description": "Ejecuta otro job después de un retraso especificado.",
-        "parameters": {"delay_seconds": {"type": "number"}, "job": {"type": "job"}},
-    },
+        "parameters": {
+            "delay_seconds": {"type": "number"},
+            "job": {"type": "job"}
+        }
+    }
 }
