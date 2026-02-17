@@ -48,6 +48,9 @@ def process_msg(user_msg):
         execution_response = JobExecutorClient.execute_job(job_obj)
         # print(f"execution response: { execution_response }")
 
+        if not execution_response["success"]:
+            return execution_response["response_text"]
+
         ret_msg_prompt = RedactResponsePrompt.get_response_message_prompt(
             user_msg,
             execution_response["response_text"]

@@ -22,6 +22,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fn, err := jobs.JobRouter(job.JobID)
 	if err != nil {
 		// job doesnt exist in the router
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("--- Routing ---\n"))
 		w.Write([]byte("Job doesnt exist in the router\n"))
 		w.Write([]byte("---------------\n"))
@@ -31,18 +32,19 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	exec, err := fn(job)
 
 	if err != nil {
-		w.Write([]byte("--- Error fuera de flujo ---\n"))
-		w.Write([]byte(err.Error()))
-		http.Error(w, "internal error", http.StatusInternalServerError)
-		w.Write([]byte("----------------------------\n"))
+		w.WriteHeader(http.StatusInternalServerError)
+    w.Write([]byte("--- Error fuera de flujo ---\n"))
+    w.Write([]byte(err.Error()))
+    w.Write([]byte("\n----------------------------\n"))
+    return
 	}
 
 	if exec.Failed {
 		// error while execution job
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("--- Execution ---\n"))
 		w.Write(fmt.Appendf(nil, "Failed: %t\n", exec.Failed))
 		w.Write(fmt.Appendf(nil, "Error: %s\n", exec.Msg))
-		http.Error(w, exec.Msg, http.StatusBadRequest)
 		w.Write([]byte("-----------------\n"))
 
 		return
