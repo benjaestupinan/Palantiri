@@ -1,14 +1,10 @@
-package jobs
-
-import (
-)
+package types
 
 type Execution struct {
 	Output string
-	Msg string
+	Msg    string
 	Failed bool
 }
-
 
 type Job struct {
 	JobID      string
@@ -16,10 +12,3 @@ type Job struct {
 }
 
 type JobFunc func(Job) (Execution, error)
-
-var jobHandlers = map[string]JobFunc{
-	"echo":        EchoJob,
-	"get_system_date_and_time": GetSystemDateAndTimeJob,
-}
-
-
