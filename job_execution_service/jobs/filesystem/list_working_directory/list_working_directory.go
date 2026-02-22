@@ -9,7 +9,9 @@ import (
 
 func ListWorkingDirectoryJob(job types.Job) (types.Execution, error) {
 
-	entries, err := os.ReadDir("./")
+	path := job.Parameters["path"].(string)
+
+	entries, err := os.ReadDir(path)
 
 	if err != nil {
 		return types.Execution{
