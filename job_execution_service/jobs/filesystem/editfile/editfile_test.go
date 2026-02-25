@@ -186,7 +186,26 @@ func TestEditfileJob_LineOutOfBounds(t *testing.T) {
 	}()
 
 	exec, err := EditfileJob(job)
-	if err == nil && !exec.Failed {
-		t.Fatalf("expected failure for out-of-bounds linenum")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if exec.Failed {
+		t.Fatalf("execution should not have failed")
+	}
+	if exec.Msg != "ok\n" {
+		t.Fatalf("unexpected message: %q", exec.Msg)
+	}
+	if exec.Output != "File edited correctly" {
+		t.Fatalf("unexpected output: %q", exec.Output)
+	}
+
+	// Verificar que el archivo fue realmente modificado en disco.
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("failed to read file after edit: %v", err)
+	}
+	lines := strings.Split(string(data), "\n")
+	if lines[98] != "out of bounds" {
+		t.Fatalf("expected line 2 to be %q, got %q", "out of bounds", lines[98])
 	}
 }

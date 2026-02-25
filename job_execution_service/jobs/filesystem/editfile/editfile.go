@@ -34,12 +34,8 @@ func EditfileJob(job types.Job) (types.Execution, error) {
 	file_lines := strings.Split(string(data), "\n")
 
 	for _, edit := range edits {
-		if edit.linenum > len(file_lines) {
-			return types.Execution{
-				Output: "Line out of bounds",
-				Msg: 		"Line out of bounds\n",
-				Failed: true,
-			}, nil
+		for edit.linenum > len(file_lines) {
+			file_lines = append(file_lines, "")
 		}
 		file_lines[edit.linenum -1] = edit.newline
 	}
