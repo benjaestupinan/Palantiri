@@ -6,6 +6,8 @@ import (
 	"github.com/benjaestupinan/job-execution-service/jobs/types"
 )
 
+func init() { types.Register("readfile", ReadfileJob) }
+
 func ReadfileJob(job types.Job) (types.Execution, error) {
 	path := job.Parameters["path"].(string)
 

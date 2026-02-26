@@ -3,9 +3,18 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/benjaestupinan/job-execution-service/jobs"
 	"log"
 	"net/http"
+
+	"github.com/benjaestupinan/job-execution-service/jobs"
+
+	// Registrar nuevo job: agregar un blank import aquí
+	_ "github.com/benjaestupinan/job-execution-service/jobs/echo"
+	_ "github.com/benjaestupinan/job-execution-service/jobs/filesystem/createfile"
+	_ "github.com/benjaestupinan/job-execution-service/jobs/filesystem/editfile"
+	_ "github.com/benjaestupinan/job-execution-service/jobs/filesystem/list_working_directory"
+	_ "github.com/benjaestupinan/job-execution-service/jobs/filesystem/readfile"
+	_ "github.com/benjaestupinan/job-execution-service/jobs/get_system_date_and_time"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {

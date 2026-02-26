@@ -12,6 +12,8 @@ type Edit struct {
 newline string
 }
 
+func init() { types.Register("editfile", EditfileJob) }
+
 func EditfileJob(job types.Job) (types.Execution, error) {
 	path := job.Parameters["path"].(string)
 	edits := job.Parameters["edits"].([]Edit)

@@ -7,6 +7,8 @@ import (
 	"github.com/benjaestupinan/job-execution-service/jobs/types"
 )
 
+func init() { types.Register("echo", EchoJob) }
+
 func EchoJob(job types.Job) (types.Execution, error) {
 	cmd := exec.Command("echo", job.Parameters["message"].(string))
 

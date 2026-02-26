@@ -7,6 +7,8 @@ import (
 )
 
 
+func init() { types.Register("list_working_directory", ListWorkingDirectoryJob) }
+
 func ListWorkingDirectoryJob(job types.Job) (types.Execution, error) {
 
 	path := job.Parameters["path"].(string)
