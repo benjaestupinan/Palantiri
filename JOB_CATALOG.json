@@ -1,8 +1,10 @@
 {
     "createfile": {
+        "description": "Crea un archivo vacío en el path indicado.",
         "job_id": "createfile",
         "parameters": {
             "path": {
+                "description": "Ruta del archivo a crear.",
                 "type": "string"
             }
         }
@@ -18,15 +20,19 @@
         }
     },
     "editfile": {
+        "description": "Edita el archivo con el path indicado en los parametros",
         "job_id": "editfile",
         "parameters": {
             "edits": {
+                "description": "Lista de ediciones a aplicar sobre el archivo.",
                 "items": {
                     "properties": {
                         "linenum": {
+                            "description": "Número de línea a editar (1-indexed).",
                             "type": "number"
                         },
                         "newline": {
+                            "description": "Nuevo contenido de la línea.",
                             "type": "string"
                         }
                     },
@@ -35,6 +41,7 @@
                 "type": "array"
             },
             "path": {
+                "description": "Ruta del archivo a editar.",
                 "type": "string"
             }
         }
@@ -45,17 +52,21 @@
         "parameters": {}
     },
     "list_working_directory": {
+        "description": "Lista los archivos y directorios dentro del path indicado.",
         "job_id": "list_working_directory",
         "parameters": {
             "path": {
+                "description": "Ruta del directorio a listar.",
                 "type": "string"
             }
         }
     },
     "readfile": {
+        "description": "Lee y devuelve el contenido de un archivo (máximo 100KB).",
         "job_id": "readfile",
         "parameters": {
             "path": {
+                "description": "Ruta del archivo a leer.",
                 "type": "string"
             }
         }
