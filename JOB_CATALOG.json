@@ -1,24 +1,63 @@
 {
-    "echo": {
-        "job_id": "echo",
-        "description": "Devuelve exactamente el mensaje entregado, sin modificaciones.",
+    "createfile": {
+        "job_id": "createfile",
         "parameters": {
-            "message": {"type": "string", "description": "Texto a devolver tal cual."}
+            "path": {
+                "type": "string"
+            }
         }
     },
-
+    "echo": {
+        "description": "Devuelve exactamente el mensaje entregado, sin modificaciones.",
+        "job_id": "echo",
+        "parameters": {
+            "message": {
+                "description": "Texto a devolver tal cual.",
+                "type": "string"
+            }
+        }
+    },
+    "editfile": {
+        "job_id": "editfile",
+        "parameters": {
+            "edits": {
+                "items": {
+                    "properties": {
+                        "linenum": {
+                            "type": "number"
+                        },
+                        "newline": {
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "type": "array"
+            },
+            "path": {
+                "type": "string"
+            }
+        }
+    },
     "get_system_date_and_time": {
-        "job_id": "get_system_date_and_time",
         "description": "Obtiene la fecha y hora actual del sistema.",
+        "job_id": "get_system_date_and_time",
         "parameters": {}
     },
-    
-    "delay_job": {
-        "job_id": "delay_job",
-        "description": "Ejecuta otro job después de un retraso especificado.",
+    "list_working_directory": {
+        "job_id": "list_working_directory",
         "parameters": {
-            "delay_seconds": {"type": "number"},
-            "job": {"type": "job"}
+            "path": {
+                "type": "string"
+            }
+        }
+    },
+    "readfile": {
+        "job_id": "readfile",
+        "parameters": {
+            "path": {
+                "type": "string"
+            }
         }
     }
 }
