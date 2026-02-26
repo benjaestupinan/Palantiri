@@ -8,6 +8,11 @@ import RedactResponsePrompt as RedactResponsePrompt
 import requests
 import validator as validator
 
+DEBUG = True
+
+def debug_print(string, debug_bool = DEBUG):
+    if debug_bool:
+        print(string)
 
 def process_msg(user_msg):
     #step 1 resolve intent
@@ -16,7 +21,7 @@ def process_msg(user_msg):
 
     intent_obj = json.loads(intent_raw)
     intent = intent_obj["category"]
-    # print(f"intent found: {intent}")
+    debug_print(f"intent found: {intent}\n---------------")
 
     #step 2 cases:
             
@@ -31,9 +36,9 @@ def process_msg(user_msg):
         #step 3b resolve select job
         job_prompt = JobSelectionPrompt.get_job_selection_prompt(user_msg)
         job = PromptLLM.ask_qwen(job_prompt)
-        # print(f"job_raawr: {job}")
+        debug_print(f"job_raw: {job}\n---------------")
         job_obj = json.loads(job)
-        # print(f"job: {job_obj}")
+        debug_print(f"job:\n{json.dumps(job_obj, indent=4, ensure_ascii=False)}\n---------------")
 
         #step 4 validate job structure and parameters
         valid, msg = validator.validate_job(job_obj) 
@@ -46,7 +51,7 @@ def process_msg(user_msg):
         # return "Job execution connection not yet implemented"
 
         execution_response = JobExecutorClient.execute_job(job_obj)
-        # print(f"execution response: { execution_response }")
+        debug_print(f"execution response:\nsuccess: {execution_response['success']} | status: {execution_response['status_code']}\n{execution_response['response_text']}\n---------------")
 
         if not execution_response["success"]:
             return execution_response["response_text"]
