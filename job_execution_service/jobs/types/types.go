@@ -12,3 +12,9 @@ type Job struct {
 }
 
 type JobFunc func(Job) (Execution, error)
+
+var Registry = map[string]JobFunc{}
+
+func Register(id string, fn JobFunc) {
+	Registry[id] = fn
+}
