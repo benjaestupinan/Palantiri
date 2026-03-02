@@ -47,9 +47,9 @@ def get_job_selection_prompt(user_msg):
   Fuera de esta excepción, NO realices inferencias ni transformaciones implícitas.
   
   FORMAS VÁLIDAS DE SOLICITUD:
-  - Imperativo directo (ej: "suma 2 y 3")
-  - Petición cortés (ej: "podrías sumar 2 y 3?")
-  - Pregunta directa con objetivo accionable (ej: "cuánto es 2 + 3")
+  - Imperativo directo (ej: "apaga la luz", "pon una alarma a las 7")
+  - Petición cortés (ej: "podrías decirme la hora?", "podrías apagar la luz?")
+  - Pregunta directa con objetivo accionable (ej: "qué hora es", "cuánta memoria RAM hay disponible")
   
   NO SELECCIONES JOBS ANTE:
   - mensajes conversacionales
@@ -84,14 +84,23 @@ def get_job_selection_prompt(user_msg):
     - Describir únicamente el criterio aplicado
       (ej: "acción explícita con retraso temporal convertido a segundos").
   
+  JOB_IDS VÁLIDOS (lista exhaustiva y definitiva):
+  {list(JOB_CATALOG.keys())}
+
+  ESTA ES LA ÚNICA LISTA DE JOB_IDS PERMITIDOS.
+  Si el job_id que necesitarías usar no aparece EXACTAMENTE en esa lista,
+  DEBES retornar job_id = null.
+  Un job_id "similar", "aproximado" o "inferido" NO es válido.
+
   CATÁLOGO DE JOBS DISPONIBLES:
   {JOB_CATALOG}
-  
+
   MENSAJE DEL USUARIO:
   {user_msg}
-  
+
   RECORDATORIO FINAL:
   Si no puedes seleccionar un job cumpliendo TODAS las reglas anteriores,
+  o si la capacidad solicitada no existe en el catálogo,
   responde con job_id = null.
   """
   return msg
