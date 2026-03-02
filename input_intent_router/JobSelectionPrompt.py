@@ -47,9 +47,9 @@ def get_job_selection_prompt(user_msg):
   Fuera de esta excepción, NO realices inferencias ni transformaciones implícitas.
   
   FORMAS VÁLIDAS DE SOLICITUD:
-  - Imperativo directo (ej: "suma 2 y 3")
-  - Petición cortés (ej: "podrías sumar 2 y 3?")
-  - Pregunta directa con objetivo accionable (ej: "cuánto es 2 + 3")
+  - Imperativo directo (ej: "apaga la luz", "pon una alarma a las 7")
+  - Petición cortés (ej: "podrías decirme la hora?", "podrías apagar la luz?")
+  - Pregunta directa con objetivo accionable (ej: "qué hora es", "cuánta memoria RAM hay disponible")
   
   NO SELECCIONES JOBS ANTE:
   - mensajes conversacionales

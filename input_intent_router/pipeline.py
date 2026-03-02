@@ -40,16 +40,18 @@ def process_msg(user_msg):
         job_obj = json.loads(job)
         debug_print(f"job:\n{json.dumps(job_obj, indent=4, ensure_ascii=False)}\n---------------")
 
-        #step 4 validate job structure and parameters
-        valid, msg = validator.validate_job(job_obj) 
+        #step 4 handle null job_id (no matching job found)
+        if job_obj.get("job_id") is None:
+            debug_print(f"no job selected, falling back to chatty LLM\n---------------")
+            return PromptLLM.ask_chatty(user_msg)
+
+        #step 5 validate job structure and parameters
+        valid, msg = validator.validate_job(job_obj)
 
         if not valid:
-            return f"Job invalido, err: {msg}"        
+            return f"Job invalido, err: {msg}"
 
-        #step 5 send job to job_execution_service via http
-        # bintent_router_moduleuild body
-        # return "Job execution connection not yet implemented"
-
+        #step 6 send job to job_execution_service via http
         execution_response = JobExecutorClient.execute_job(job_obj)
         debug_print(f"execution response:\nsuccess: {execution_response['success']} | status: {execution_response['status_code']}\n{execution_response['response_text']}\n---------------")
 
