@@ -43,12 +43,16 @@ def process_msg(user_msg):
         #step 4 handle null job_id (no matching job found)
         if job_obj.get("job_id") is None:
             debug_print(f"no job selected, falling back to chatty LLM\n---------------")
-            return PromptLLM.ask_chatty(user_msg)
+            return PromptLLM.ask_chatty(RedactResponsePrompt.get_no_capability_prompt(user_msg))
 
         #step 5 validate job structure and parameters
         valid, msg = validator.validate_job(job_obj)
 
         if not valid:
+            if msg.startswith("Unknown job_id"):
+                # LLM hallucinated a job that doesn't exist in the catalog
+                debug_print(f"hallucinated job_id, falling back to chatty LLM\n---------------")
+                return PromptLLM.ask_chatty(RedactResponsePrompt.get_no_capability_prompt(user_msg))
             return f"Job invalido, err: {msg}"
 
         #step 6 send job to job_execution_service via http

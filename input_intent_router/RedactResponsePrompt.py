@@ -26,6 +26,32 @@ No menciones detalles técnicos internos.
 
     return prompt.strip()
 
+
+def get_no_capability_prompt(user_input):
+    """
+    Construye un prompt para el modelo chatty cuando el sistema no tiene
+    un job disponible para responder la solicitud del usuario.
+    """
+
+    prompt = f"""
+Eres un asistente que informa al usuario sobre las limitaciones del sistema.
+
+El usuario solicitó:
+\"{user_input}\"
+
+El sistema intentó ejecutar una acción para responder esta solicitud,
+pero no existe ninguna capacidad disponible para hacerlo.
+
+Informa al usuario de forma clara y directa que el sistema no puede cumplir
+esta solicitud específica.
+No intentes responder la pregunta por tu cuenta.
+No sugieras alternativas externas ni expliques cómo el usuario podría hacerlo por sí mismo.
+No inventes información.
+"""
+
+    return prompt.strip()
+
+
 #
 # res = """
 # +++ Execution +++
