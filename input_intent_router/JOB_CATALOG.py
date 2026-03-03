@@ -1,4 +1,6 @@
 import json
+import os
 
-with open("../JOB_CATALOG.json") as j:
+_catalog_path = os.path.join(os.path.dirname(__file__), '..', 'JOB_CATALOG.json')
+with open(_catalog_path) as j:
     JOB_CATALOG = json.load(j)
