@@ -1,12 +1,13 @@
 import json
 
-import IntentRouterPrompt as IntentRouterPrompt
-import JobExecutorClient as JobExecutorClient
-import JobSelectionPrompt as JobSelectionPrompt
-import PromptLLM as PromptLLM
-import RedactResponsePrompt as RedactResponsePrompt
+from . import IntentRouterPrompt
+from . import JobExecutorClient
+from . import JobSelectionPrompt
+from . import PromptLLM
+from . import RedactResponsePrompt
 import requests
-import validator as validator
+from . import validator
+from the_way_of_the_voice.main import speak
 
 DEBUG = True
 
@@ -73,5 +74,6 @@ def process_msg(user_msg):
         #step 7 return final response
         return ret_msg
 
-msg = str(input("msg: "))
-print(process_msg(msg))
+if __name__ == "__main__":
+    msg = str(input("msg: "))
+    speak(process_msg(msg))
