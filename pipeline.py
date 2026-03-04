@@ -1,13 +1,11 @@
 import json
 
-from . import IntentRouterPrompt
-from . import JobExecutorClient
-from . import JobSelectionPrompt
-from . import PromptLLM
-from . import RedactResponsePrompt
-import requests
-from . import validator
-from the_way_of_the_voice.main import speak
+from input_intent_router import IntentRouterPrompt
+from input_intent_router import JobExecutorClient
+from input_intent_router import JobSelectionPrompt
+from input_intent_router import PromptLLM
+from input_intent_router import RedactResponsePrompt
+from input_intent_router import validator
 
 DEBUG = True
 
@@ -25,10 +23,10 @@ def process_msg(user_msg):
     debug_print(f"intent found: {intent}\n---------------")
 
     #step 2 cases:
-            
+
     # COGNITIVE_REQUEST
     if intent == "COGNITIVE_REQUEST":
-      
+
         #step 3a handle user_msg with chatty LLM
         return PromptLLM.ask_chatty(user_msg)
 
@@ -75,5 +73,6 @@ def process_msg(user_msg):
         return ret_msg
 
 if __name__ == "__main__":
+    from the_way_of_the_voice.main import speak
     msg = str(input("msg: "))
     speak(process_msg(msg))
