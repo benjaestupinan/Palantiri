@@ -2,6 +2,11 @@ from .JOB_CATALOG import JOB_CATALOG
 
 
 def validate_value(value, spec, path):
+    """
+    Valida recursivamente un valor contra su spec del catálogo.
+    Soporta tipos: string, number, boolean, array, object, job (anidado).
+    Retorna (bool, str): (válido, mensaje).
+    """
     match spec["type"]:
         case "job":
             return validate_job(value)

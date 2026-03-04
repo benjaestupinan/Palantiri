@@ -2,6 +2,15 @@ from .JOB_CATALOG import JOB_CATALOG
 
 
 def get_job_selection_prompt(user_msg):
+  """
+  Construye el prompt para seleccionar un job del JOB_CATALOG.
+
+  Incluye el catálogo completo y reglas estrictas anti-alucinación.
+  Retorna un prompt que instruye al LLM a responder con JSON:
+    { job_id, parameters, confidence, explanation }
+
+  job_id será null si no hay un job adecuado o si faltan parámetros.
+  """
   msg = f"""
   Eres un componente interno del sistema.
   No eres un chatbot ni un asistente conversacional.

@@ -1,5 +1,16 @@
 
 def get_intent_prompt(user_msg):
+  """
+  Construye el prompt para clasificar la intención del mensaje del usuario.
+
+  Retorna un prompt que instruye al LLM a responder exclusivamente con un JSON
+  con los campos: category, confidence, explanation.
+
+  Categorías posibles:
+    - COGNITIVE_REQUEST: el modelo puede responder sin datos externos.
+    - COGNITIVE_REQUEST_WITH_EXTRA_DATA: requiere datos externos (hora, sensores, etc.).
+    - SYSTEM_ACTION: requiere ejecutar o programar una acción en el sistema.
+  """
   msg = f"""
   Eres un clasificador interno del sistema.
   No eres un chatbot ni un asistente conversacional.

@@ -73,6 +73,6 @@ def process_msg(user_msg):
         return ret_msg
 
 if __name__ == "__main__":
-    from the_way_of_the_voice.main import speak
+    from the_way_of_the_voice.tts_service import speak
     msg = str(input("msg: "))
     speak(process_msg(msg))
