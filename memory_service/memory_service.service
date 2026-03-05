@@ -1,0 +1,14 @@
+[Unit]
+Description=Palantiri Memory Service
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/memory_service.env
+ExecStart=/usr/local/bin/memory_service
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
