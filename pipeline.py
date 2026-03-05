@@ -1,11 +1,11 @@
 import json
 
-from input_intent_router import IntentRouterPrompt
-from input_intent_router import JobExecutorClient
-from input_intent_router import JobSelectionPrompt
-from input_intent_router import PromptLLM
-from input_intent_router import RedactResponsePrompt
-from input_intent_router import validator
+from brain import IntentRouterPrompt
+from brain import JobExecutorClient
+from brain import JobSelectionPrompt
+from brain import PromptLLM
+from brain import RedactResponsePrompt
+from brain import validator
 
 DEBUG = True
 

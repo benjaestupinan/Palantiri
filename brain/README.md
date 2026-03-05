@@ -1,4 +1,4 @@
-# input_intent_router
+# brain
 
 Módulo Python que implementa el núcleo cognitivo del pipeline de LENS: clasifica la intención del usuario, selecciona y valida el job correspondiente, y construye los prompts para los modelos LLM.
 

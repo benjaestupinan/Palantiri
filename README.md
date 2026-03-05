@@ -72,7 +72,7 @@ Todo el razonamiento corre localmente vía [Ollama](https://ollama.com). No hay 
 | Componente | Tecnología | Descripción |
 |---|---|---|
 | `pipeline.py` | Python | Orquestador principal del flujo |
-| `input_intent_router/` | Python | Clasificación de intención, selección y validación de jobs, prompts LLM |
+| `brain/` | Python | Clasificación de intención, selección y validación de jobs, prompts LLM |
 | `job_execution_service/` | Go | Servidor HTTP que ejecuta jobs de forma determinista |
 | `the_way_of_the_voice/` | Python (Coqui TTS) | Síntesis de voz del output |
 | `JOB_CATALOG.json` | JSON | Catálogo central de jobs disponibles con schemas |
@@ -101,7 +101,7 @@ Todo el razonamiento corre localmente vía [Ollama](https://ollama.com). No hay 
 
 ### 2. Variables de entorno
 
-Crear `input_intent_router/.env`:
+Crear `brain/.env`:
 ```env
 OLLAMA_HOST=localhost
 OLLAMA_PORT=11434
@@ -111,7 +111,7 @@ JOB_EXECUTOR_PORT=8081
 
 ### 3. Instalar dependencias Python
 ```sh
-cd input_intent_router
+cd brain
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt

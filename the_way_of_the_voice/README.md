@@ -29,7 +29,7 @@ speak("Hola, soy LENS.")
 
 Instalar junto con el resto del proyecto:
 ```sh
-pip install -r input_intent_router/requirements.txt
+pip install -r brain/requirements.txt
 ```
 
 ---
