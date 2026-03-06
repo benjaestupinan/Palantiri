@@ -30,7 +30,11 @@ SQL
 
 echo "==> Aplicando schema..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-sudo -u postgres psql -d "${DB_NAME}" -f "${SCRIPT_DIR}/schema.sql"
+SCHEMA_TMP=$(mktemp)
+cp "${SCRIPT_DIR}/schema.sql" "${SCHEMA_TMP}"
+chmod 644 "${SCHEMA_TMP}"
+sudo -u postgres psql -d "${DB_NAME}" -f "${SCHEMA_TMP}"
+rm -f "${SCHEMA_TMP}"
 
 sudo -u postgres psql -d "${DB_NAME}" <<SQL
 GRANT ALL ON ALL TABLES IN SCHEMA public TO ${DB_USER};
