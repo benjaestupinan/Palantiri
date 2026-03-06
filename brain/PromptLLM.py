@@ -25,13 +25,18 @@ def ask_qwen(prompt): # cache que conviene mas con streaming: false
     data = response.json()
     return data["response"]
 
-def ask_chatty(prompt, history=None): # aqui puede ser mejor streaming: true
+def ask_chatty(prompt, history=None, system_prompt=None): # aqui puede ser mejor streaming: true
     """
     Envía un prompt a qwen2.5:7b-instruct (modelo conversacional).
     Usado para respuestas en lenguaje natural y mensajes de fallback.
-    Acepta un historial opcional de mensajes previos de la sesión.
+    Acepta un historial opcional de mensajes previos de la sesión y un
+    system prompt opcional para inyectar contexto externo.
     """
-    messages = (history or []) + [{"role": "user", "content": prompt}]
+    messages = []
+    if system_prompt:
+        messages.append({"role": "system", "content": system_prompt})
+    messages += (history or []) + [{"role": "user", "content": prompt}]
+
     payload = {
         "model": "qwen2.5:7b-instruct",
         "messages": messages,

@@ -4,6 +4,7 @@ from brain import IntentRouterPrompt
 from brain import JobExecutorClient
 from brain import JobSelectionPrompt
 from brain import MemoryClient
+from brain import MemoryContextPrompt
 from brain import PromptLLM
 from brain import RedactResponsePrompt
 from brain import validator
@@ -37,9 +38,13 @@ def process_msg(user_msg):
     # COGNITIVE_REQUEST
     if intent == "COGNITIVE_REQUEST":
 
-        #step 3a handle user_msg with chatty LLM, passing session history
+        #step 3a handle user_msg with chatty LLM, passing session history and past context
         history = MemoryClient.get_history(session_id)
-        response = PromptLLM.ask_chatty(user_msg, history=history)
+        recent_past = MemoryClient.get_recent_past_messages(session_id)
+        keyword_matches = MemoryClient.search(user_msg)
+        past_context = recent_past + [m for m in keyword_matches if m not in recent_past]
+        system_prompt = MemoryContextPrompt.get_memory_context_prompt(past_context)
+        response = PromptLLM.ask_chatty(user_msg, history=history, system_prompt=system_prompt)
         MemoryClient.save_message(session_id, "user", user_msg)
         MemoryClient.save_message(session_id, "assistant", response)
         return response, intent

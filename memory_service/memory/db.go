@@ -81,6 +81,36 @@ type SearchResult struct {
 	CreatedAt string `json:"created_at"`
 }
 
+func GetRecentMessages(excludeSessionID string, n int) ([]SearchResult, error) {
+	rows, err := pool.Query(context.Background(),
+		`SELECT m.session_id::text, m.role, m.content, m.created_at::text
+		 FROM messages m
+		 WHERE m.session_id::text != $1
+		 ORDER BY m.created_at DESC
+		 LIMIT $2`,
+		excludeSessionID, n)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []SearchResult
+	for rows.Next() {
+		var r SearchResult
+		if err := rows.Scan(&r.SessionID, &r.Role, &r.Content, &r.CreatedAt); err != nil {
+			return nil, err
+		}
+		results = append(results, r)
+	}
+
+	// Revertir a orden cronológico
+	for i, j := 0, len(results)-1; i < j; i, j = i+1, j-1 {
+		results[i], results[j] = results[j], results[i]
+	}
+
+	return results, nil
+}
+
 func Search(query string, limit int) ([]SearchResult, error) {
 	rows, err := pool.Query(context.Background(),
 		`SELECT m.session_id::text, m.role, m.content, m.created_at::text

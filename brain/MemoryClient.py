@@ -45,6 +45,20 @@ def get_history(session_id: str, n: int = 10) -> list[dict]:
         return []
 
 
+def get_recent_past_messages(exclude_session_id: str, n: int = 20) -> list[dict]:
+    try:
+        response = requests.get(
+            f"{BASE_URL}/recent_messages",
+            params={"exclude_session": exclude_session_id, "n": n},
+            timeout=3,
+        )
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        print(f"[memory] get_recent_past_messages failed: {e}")
+        return []
+
+
 def search(query: str, limit: int = 5) -> list[dict]:
     try:
         response = requests.get(

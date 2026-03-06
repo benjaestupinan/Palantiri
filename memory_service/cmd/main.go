@@ -19,6 +19,7 @@ func main() {
 	mux.HandleFunc("POST /message", memory.HandleSaveMessage)
 	mux.HandleFunc("GET /session/{sessionID}/messages", memory.HandleGetMessages)
 	mux.HandleFunc("GET /search", memory.HandleSearch)
+	mux.HandleFunc("GET /recent_messages", memory.HandleGetRecentMessages)
 
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

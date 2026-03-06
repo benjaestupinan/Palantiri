@@ -65,6 +65,34 @@ func HandleGetMessages(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(messages)
 }
 
+func HandleGetRecentMessages(w http.ResponseWriter, r *http.Request) {
+	excludeSession := r.URL.Query().Get("exclude_session")
+	if excludeSession == "" {
+		http.Error(w, "exclude_session parameter is required", http.StatusBadRequest)
+		return
+	}
+
+	n := 20
+	if nStr := r.URL.Query().Get("n"); nStr != "" {
+		if parsed, err := strconv.Atoi(nStr); err == nil {
+			n = parsed
+		}
+	}
+
+	results, err := GetRecentMessages(excludeSession, n)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if results == nil {
+		results = []SearchResult{}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(results)
+}
+
 func HandleSearch(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
 	if q == "" {
