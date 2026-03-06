@@ -27,6 +27,13 @@ def process_msg(user_msg):
 
     #step 2 cases:
 
+    # END_SESSION
+    if intent == "END_SESSION":
+        global session_id
+        session_id = MemoryClient.create_session()
+        debug_print(f"session ended, new session_id: {session_id}\n---------------")
+        return PromptLLM.ask_chatty("El usuario se despidió. Respondé con una despedida cordial y breve.")
+
     # COGNITIVE_REQUEST
     if intent == "COGNITIVE_REQUEST":
 
