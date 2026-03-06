@@ -7,7 +7,8 @@ load_dotenv()
 host = os.getenv("OLLAMA_HOST")
 port = os.getenv("OLLAMA_PORT", "11434")
 
-url = f"http://{host}:{port}/api/generate"
+generate_url = f"http://{host}:{port}/api/generate"
+chat_url = f"http://{host}:{port}/api/chat"
 
 def ask_qwen(prompt): # cache que conviene mas con streaming: false
     """
@@ -20,21 +21,23 @@ def ask_qwen(prompt): # cache que conviene mas con streaming: false
         "stream": False
     }
 
-    response = requests.post(url, json=payload)
+    response = requests.post(generate_url, json=payload)
     data = response.json()
     return data["response"]
-    
-def ask_chatty(prompt): # aqui puede ser mejor streaming: true
+
+def ask_chatty(prompt, history=None): # aqui puede ser mejor streaming: true
     """
     Envía un prompt a qwen2.5:7b-instruct (modelo conversacional).
     Usado para respuestas en lenguaje natural y mensajes de fallback.
+    Acepta un historial opcional de mensajes previos de la sesión.
     """
+    messages = (history or []) + [{"role": "user", "content": prompt}]
     payload = {
         "model": "qwen2.5:7b-instruct",
-        "prompt": prompt,
-        "stream": False # Cambiar a True en algun futuro, ahora no lo pude implementar :(
+        "messages": messages,
+        "stream": False
     }
 
-    response = requests.post(url, json=payload)
+    response = requests.post(chat_url, json=payload)
     data = response.json()
-    return data["response"]
+    return data["message"]["content"]
