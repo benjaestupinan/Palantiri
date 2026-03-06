@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -82,13 +83,24 @@ type SearchResult struct {
 }
 
 func GetRecentMessages(excludeSessionID string, n int) ([]SearchResult, error) {
-	rows, err := pool.Query(context.Background(),
-		`SELECT m.session_id::text, m.role, m.content, m.created_at::text
-		 FROM messages m
-		 WHERE m.session_id::text != $1
-		 ORDER BY m.created_at DESC
-		 LIMIT $2`,
-		excludeSessionID, n)
+	var rows pgx.Rows
+	var err error
+	if excludeSessionID == "" {
+		rows, err = pool.Query(context.Background(),
+			`SELECT m.session_id::text, m.role, m.content, m.created_at::text
+			 FROM messages m
+			 ORDER BY m.created_at DESC
+			 LIMIT $1`,
+			n)
+	} else {
+		rows, err = pool.Query(context.Background(),
+			`SELECT m.session_id::text, m.role, m.content, m.created_at::text
+			 FROM messages m
+			 WHERE m.session_id::text != $1
+			 ORDER BY m.created_at DESC
+			 LIMIT $2`,
+			excludeSessionID, n)
+	}
 	if err != nil {
 		return nil, err
 	}

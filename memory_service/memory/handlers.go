@@ -67,10 +67,6 @@ func HandleGetMessages(w http.ResponseWriter, r *http.Request) {
 
 func HandleGetRecentMessages(w http.ResponseWriter, r *http.Request) {
 	excludeSession := r.URL.Query().Get("exclude_session")
-	if excludeSession == "" {
-		http.Error(w, "exclude_session parameter is required", http.StatusBadRequest)
-		return
-	}
 
 	n := 20
 	if nStr := r.URL.Query().Get("n"); nStr != "" {
