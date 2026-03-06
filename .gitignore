@@ -1,4 +1,5 @@
 .aider*
 *.wav*
 
+*.env
 *pycache*

@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/benjaestupinan/job-execution-service/jobs"
+	"github.com/joho/godotenv"
 
 	// Registrar nuevo job: agregar un blank import aquí
 	_ "github.com/benjaestupinan/job-execution-service/jobs/echo"
@@ -15,6 +16,8 @@ import (
 	_ "github.com/benjaestupinan/job-execution-service/jobs/filesystem/list_working_directory"
 	_ "github.com/benjaestupinan/job-execution-service/jobs/filesystem/readfile"
 	_ "github.com/benjaestupinan/job-execution-service/jobs/get_system_date_and_time"
+	_ "github.com/benjaestupinan/job-execution-service/jobs/memory/get_recent_context"
+	_ "github.com/benjaestupinan/job-execution-service/jobs/memory/search_memory"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -67,6 +70,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	if err := godotenv.Load("../.env"); err != nil {
+		log.Println("No .env file found, reading from environment")
+	}
+
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {

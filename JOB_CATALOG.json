@@ -70,5 +70,20 @@
                 "type": "string"
             }
         }
+    },
+    "search_memory": {
+        "description": "Busca en el historial de conversaciones pasadas por una palabra clave o tema.",
+        "job_id": "search_memory",
+        "parameters": {
+            "query": {
+                "description": "Palabra clave o tema a buscar en el historial.",
+                "type": "string"
+            }
+        }
+    },
+    "get_recent_context": {
+        "description": "Recupera los mensajes más recientes de conversaciones anteriores.",
+        "job_id": "get_recent_context",
+        "parameters": {}
     }
 }
