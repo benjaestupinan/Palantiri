@@ -89,5 +89,6 @@ def process_msg(user_msg):
 
 if __name__ == "__main__":
     from the_way_of_the_voice.tts_service import speak
-    msg = str(input("msg: "))
-    speak(process_msg(msg))
+    while True:
+        msg = str(input("msg: "))
+        speak(process_msg(msg))
