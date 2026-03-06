@@ -1,3 +1,10 @@
+from brain.JOB_CATALOG import JOB_CATALOG as _catalog
+
+def _format_catalog():
+  lines = []
+  for job in _catalog.values():
+    lines.append(f'  - {job["job_id"]}: {job["description"]}')
+  return "\n".join(lines)
 
 def get_intent_prompt(user_msg):
   """
@@ -7,9 +14,8 @@ def get_intent_prompt(user_msg):
   con los campos: category, confidence, explanation.
 
   Categorías posibles:
-    - COGNITIVE_REQUEST: el modelo puede responder sin datos externos.
-    - COGNITIVE_REQUEST_WITH_EXTRA_DATA: requiere datos externos (hora, sensores, etc.).
-    - SYSTEM_ACTION: requiere ejecutar o programar una acción en el sistema.
+    - COGNITIVE_REQUEST: el modelo puede responder sin capacidades externas.
+    - EXTEND_CONTEXT_WITH_SYSTEM_ACTION: requiere alguna de las capacidades del catálogo de jobs.
     - END_SESSION: el usuario se despide o indica que terminó la conversación.
   """
   msg = f"""
@@ -17,52 +23,35 @@ def get_intent_prompt(user_msg):
   No eres un chatbot ni un asistente conversacional.
 
   Tu única función es analizar el mensaje del usuario y clasificarlo
-  según el tipo de capacidades necesarias para responderlo.
+  según si puede responderse con razonamiento interno del modelo,
+  o si requiere alguna de las capacidades externas disponibles en el sistema.
 
-  NO clasifiques por intención humana general.
-  NO clasifiques por cortesía, tono o forma lingüística.
-  Clasifica únicamente según si la respuesta puede generarse
-  de forma autónoma por el modelo o si requiere capacidades externas
-  al sistema.
+  CAPACIDADES EXTERNAS DISPONIBLES (jobs del sistema):
+{_format_catalog()}
 
   CATEGORÍAS OBLIGATORIAS (elige EXACTAMENTE una):
 
   1) COGNITIVE_REQUEST
   El modelo puede responder completamente usando solo razonamiento interno.
-  No requiere acceso a estado, tiempo real, sensores, hardware ni APIs externas.
+  No requiere ninguna de las capacidades externas listadas arriba.
 
   Ejemplos:
   - "cuánto es 2 + 3"
   - "explícame qué es un árbol binario"
   - "resume este texto"
 
-  2) COGNITIVE_REQUEST_WITH_EXTRA_DATA
-  El usuario solicita información, pero la respuesta requiere acceso
-  a datos externos al modelo, como:
-  - hora o fecha actual
-  - estado del sistema
-  - sensores
-  - información en tiempo real
+  2) EXTEND_CONTEXT_WITH_SYSTEM_ACTION
+  Responder o ejecutar lo que pide el usuario requiere al menos una
+  de las capacidades externas listadas arriba.
 
-  NO implica ejecutar, controlar ni programar acciones.
+  Ejemplos (basados en el catálogo actual):
+  - "qué hora es" → requiere get_system_date_and_time
+  - "listá los archivos de esta carpeta" → requiere list_working_directory
+  - "creá un archivo llamado notas.txt" → requiere createfile
 
-  Ejemplos:
-  - "qué hora es"
-  - "qué fecha es hoy"
-  - "cuánta memoria RAM está en uso"
-
-  3) SYSTEM_ACTION
-  El usuario solicita que el sistema ejecute, controle, automatice
-  o programe una acción, inmediata o futura.
-
-  Ejemplos:
-  - "programa una alarma a las 7"
-  - "apaga la luz"
-  - "dime la hora en 10 minutos"
-
-  4) END_SESSION
-  El usuario se despide, indica que terminó la conversación o que no necesita
-  nada más. No implica ninguna acción ni solicitud de información.
+  3) END_SESSION
+  El usuario se despide, indica que terminó la conversación o que no
+  necesita nada más.
 
   Ejemplos:
   - "chau"
@@ -72,17 +61,9 @@ def get_intent_prompt(user_msg):
 
   REGLAS ABSOLUTAS (NO VIOLAR):
 
-  - El wording del mensaje (pregunta, orden, petición cortés)
-    NO debe afectar la clasificación.
-  - Si el resultado esperado es que algo ocurra o se programe,
-    la categoría es SYSTEM_ACTION.
-  - Si solo se solicita información y requiere datos externos,
-    la categoría es COGNITIVE_REQUEST_WITH_EXTRA_DATA.
-  - En caso de duda mínima entre SYSTEM_ACTION y
-    COGNITIVE_REQUEST_WITH_EXTRA_DATA,
-    elige COGNITIVE_REQUEST_WITH_EXTRA_DATA.
-  - END_SESSION tiene prioridad sobre cualquier otra categoría cuando
-    el usuario claramente indica que terminó la conversación.
+  - Clasificá según las capacidades necesarias, no por el tono o wording del mensaje.
+  - Si la respuesta requiere cualquiera de las capacidades del catálogo, es EXTEND_CONTEXT_WITH_SYSTEM_ACTION.
+  - Si el modelo puede responder solo con razonamiento, es COGNITIVE_REQUEST.
   - Nunca inventes categorías adicionales.
 
   FORMATO OBLIGATORIO DE RESPUESTA:
@@ -91,11 +72,11 @@ def get_intent_prompt(user_msg):
   NO escribas texto fuera del JSON.
 
   { "{" }
-    "category": "COGNITIVE_REQUEST | COGNITIVE_REQUEST_WITH_EXTRA_DATA | SYSTEM_ACTION | END_SESSION",
+    "category": "COGNITIVE_REQUEST | EXTEND_CONTEXT_WITH_SYSTEM_ACTION | END_SESSION",
     "confidence": number entre 0 y 1,
     "explanation": "explicación breve y objetiva del criterio aplicado"
   { "}" }
-  
+
   MENSAJE DEL USUARIO:
   {user_msg}
   """

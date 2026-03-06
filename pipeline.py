@@ -32,7 +32,7 @@ def process_msg(user_msg):
         global session_id
         session_id = MemoryClient.create_session()
         debug_print(f"session ended, new session_id: {session_id}\n---------------")
-        return PromptLLM.ask_chatty("El usuario se despidió. Respondé con una despedida cordial y breve.")
+        return PromptLLM.ask_chatty("El usuario se despidió. Respondé con una despedida cordial y breve."), intent
 
     # COGNITIVE_REQUEST
     if intent == "COGNITIVE_REQUEST":
@@ -42,10 +42,10 @@ def process_msg(user_msg):
         response = PromptLLM.ask_chatty(user_msg, history=history)
         MemoryClient.save_message(session_id, "user", user_msg)
         MemoryClient.save_message(session_id, "assistant", response)
-        return response
+        return response, intent
 
     # COGNITIVE_REQUEST_WITH_EXTRA_DATA or SYSTEM_ACTION
-    elif intent in [ "COGNITIVE_REQUEST_WITH_EXTRA_DATA", "SYSTEM_ACTION" ]:
+    elif intent == "EXTEND_CONTEXT_WITH_SYSTEM_ACTION":
         #step 3b resolve select job
         job_prompt = JobSelectionPrompt.get_job_selection_prompt(user_msg)
         job = PromptLLM.ask_qwen(job_prompt)
@@ -59,7 +59,7 @@ def process_msg(user_msg):
             response = PromptLLM.ask_chatty(RedactResponsePrompt.get_no_capability_prompt(user_msg))
             MemoryClient.save_message(session_id, "user", user_msg)
             MemoryClient.save_message(session_id, "assistant", response)
-            return response
+            return response, intent
 
         #step 5 validate job structure and parameters
         valid, msg = validator.validate_job(job_obj)
@@ -71,15 +71,15 @@ def process_msg(user_msg):
                 response = PromptLLM.ask_chatty(RedactResponsePrompt.get_no_capability_prompt(user_msg))
                 MemoryClient.save_message(session_id, "user", user_msg)
                 MemoryClient.save_message(session_id, "assistant", response)
-                return response
-            return f"Job invalido, err: {msg}"
+                return response, intent
+            return f"Job invalido, err: {msg}", intent
 
         #step 6 send job to job_execution_service via http
         execution_response = JobExecutorClient.execute_job(job_obj)
         debug_print(f"execution response:\nsuccess: {execution_response['success']} | status: {execution_response['status_code']}\n{execution_response['response_text']}\n---------------")
 
         if not execution_response["success"]:
-            return execution_response["response_text"]
+            return execution_response["response_text"], intent
 
         ret_msg_prompt = RedactResponsePrompt.get_response_message_prompt(
             user_msg,
@@ -92,10 +92,12 @@ def process_msg(user_msg):
         MemoryClient.save_message(session_id, "assistant", ret_msg)
 
         #step 8 return final response
-        return ret_msg
+        return ret_msg, intent
 
 if __name__ == "__main__":
     from the_way_of_the_voice.tts_service import speak
-    while True:
+    intent = None
+    while intent != "END_SESSION":
         msg = str(input("msg: "))
-        speak(process_msg(msg))
+        (resp, intent) = process_msg(msg)
+        speak(resp)
