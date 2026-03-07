@@ -39,7 +39,7 @@ def ask_chatty(prompt, history=None, system_prompt=None): # aqui puede ser mejor
     messages += (history or []) + [{"role": "user", "content": prompt}]
 
     payload = {
-        "model": "qwen2.5:7b-instruct",
+        "model": "lens",
         "messages": messages,
         "stream": False
     }
