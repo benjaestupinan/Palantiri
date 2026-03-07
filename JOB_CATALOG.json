@@ -20,29 +20,29 @@
         }
     },
     "editfile": {
-        "description": "Edita el archivo con el path indicado en los parametros",
+        "description": "Edita el archivo reemplazando fragmentos exactos de texto.",
         "job_id": "editfile",
         "parameters": {
-            "edits": {
-                "description": "Lista de ediciones a aplicar sobre el archivo.",
-                "items": {
-                    "properties": {
-                        "linenum": {
-                            "description": "Número de línea a editar (1-indexed).",
-                            "type": "number"
-                        },
-                        "newline": {
-                            "description": "Nuevo contenido de la línea.",
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
-                "type": "array"
-            },
             "path": {
                 "description": "Ruta del archivo a editar.",
                 "type": "string"
+            },
+            "edits": {
+                "description": "Lista de ediciones a aplicar. Cada edición reemplaza old_string por new_string.",
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "old_string": {
+                            "description": "Fragmento exacto del archivo a reemplazar.",
+                            "type": "string"
+                        },
+                        "new_string": {
+                            "description": "Nuevo contenido que reemplaza a old_string.",
+                            "type": "string"
+                        }
+                    }
+                }
             }
         }
     },

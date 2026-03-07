@@ -3,13 +3,11 @@ package editfile
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/benjaestupinan/job-execution-service/jobs/types"
 )
 
-// writeTestFile es un helper que crea un archivo temporal con el contenido dado.
 func writeTestFile(t *testing.T, content string) string {
 	t.Helper()
 	tmpDir := t.TempDir()
@@ -26,8 +24,10 @@ func TestEditfileJob_HappyPath(t *testing.T) {
 
 	job := types.Job{
 		Parameters: map[string]any{
-			"path":  path,
-			"edits": []Edit{{linenum: 2, newline: "edited line 2"}},
+			"path": path,
+			"edits": []any{
+				map[string]any{"old_string": "line 2", "new_string": "edited line 2"},
+			},
 		},
 	}
 
@@ -36,31 +36,26 @@ func TestEditfileJob_HappyPath(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if exec.Failed {
-		t.Fatalf("execution should not have failed")
-	}
-	if exec.Msg != "ok\n" {
-		t.Fatalf("unexpected message: %q", exec.Msg)
-	}
-	if exec.Output != "File edited correctly" {
-		t.Fatalf("unexpected output: %q", exec.Output)
+		t.Fatalf("execution should not have failed: %s", exec.Msg)
 	}
 
-	// Verificar que el archivo fue realmente modificado en disco.
 	data, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("failed to read file after edit: %v", err)
 	}
-	lines := strings.Split(string(data), "\n")
-	if lines[1] != "edited line 2" {
-		t.Fatalf("expected line 2 to be %q, got %q", "edited line 2", lines[1])
+	expected := "line 1\nedited line 2\nline 3"
+	if string(data) != expected {
+		t.Fatalf("expected %q, got %q", expected, string(data))
 	}
 }
 
 func TestEditfileJob_FileNotFound(t *testing.T) {
 	job := types.Job{
 		Parameters: map[string]any{
-			"path":  "/nonexistent/directory/file.txt",
-			"edits": []Edit{{linenum: 1, newline: "new line"}},
+			"path": "/nonexistent/directory/file.txt",
+			"edits": []any{
+				map[string]any{"old_string": "x", "new_string": "y"},
+			},
 		},
 	}
 
@@ -80,13 +75,18 @@ func TestEditfileJob_FileTooLarge(t *testing.T) {
 	}
 	defer os.Remove(tmp.Name())
 
-	tmp.WriteString(strings.Repeat("a", 102401))
+	tmp.WriteString("start\n")
+	for i := 0; i < 102400; i++ {
+		tmp.WriteString("a")
+	}
 	tmp.Close()
 
 	job := types.Job{
 		Parameters: map[string]any{
-			"path":  tmp.Name(),
-			"edits": []Edit{{linenum: 1, newline: "new line"}},
+			"path": tmp.Name(),
+			"edits": []any{
+				map[string]any{"old_string": "start", "new_string": "end"},
+			},
 		},
 	}
 
@@ -109,9 +109,9 @@ func TestEditfileJob_MultipleEdits(t *testing.T) {
 	job := types.Job{
 		Parameters: map[string]any{
 			"path": path,
-			"edits": []Edit{
-				{linenum: 1, newline: "edited line 1"},
-				{linenum: 3, newline: "edited line 3"},
+			"edits": []any{
+				map[string]any{"old_string": "line 1", "new_string": "edited line 1"},
+				map[string]any{"old_string": "line 3", "new_string": "edited line 3"},
 			},
 		},
 	}
@@ -121,19 +121,16 @@ func TestEditfileJob_MultipleEdits(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if exec.Failed {
-		t.Fatalf("execution should not have failed")
+		t.Fatalf("execution should not have failed: %s", exec.Msg)
 	}
 
 	data, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("failed to read file after edits: %v", err)
 	}
-	lines := strings.Split(string(data), "\n")
-	if lines[0] != "edited line 1" {
-		t.Fatalf("expected line 1 to be %q, got %q", "edited line 1", lines[0])
-	}
-	if lines[2] != "edited line 3" {
-		t.Fatalf("expected line 3 to be %q, got %q", "edited line 3", lines[2])
+	expected := "edited line 1\nline 2\nedited line 3\nline 4"
+	if string(data) != expected {
+		t.Fatalf("expected %q, got %q", expected, string(data))
 	}
 }
 
@@ -144,7 +141,7 @@ func TestEditfileJob_NoEdits(t *testing.T) {
 	job := types.Job{
 		Parameters: map[string]any{
 			"path":  path,
-			"edits": []Edit{},
+			"edits": []any{},
 		},
 	}
 
@@ -156,7 +153,6 @@ func TestEditfileJob_NoEdits(t *testing.T) {
 		t.Fatalf("execution should not have failed with empty edits")
 	}
 
-	// El archivo no debe haber cambiado.
 	data, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("failed to read file: %v", err)
@@ -166,46 +162,24 @@ func TestEditfileJob_NoEdits(t *testing.T) {
 	}
 }
 
-func TestEditfileJob_LineOutOfBounds(t *testing.T) {
-	content := "line 1\nline 2"
+func TestEditfileJob_OldStringNotFound(t *testing.T) {
+	content := "line 1\nline 2\nline 3"
 	path := writeTestFile(t, content)
 
 	job := types.Job{
 		Parameters: map[string]any{
-			"path":  path,
-			"edits": []Edit{{linenum: 99, newline: "out of bounds"}},
+			"path": path,
+			"edits": []any{
+				map[string]any{"old_string": "this does not exist", "new_string": "replacement"},
+			},
 		},
 	}
-
-	// Actualmente la función hace panic en este caso.
-	// Este test documenta el comportamiento esperado: retornar error, no panic.
-	defer func() {
-		if r := recover(); r != nil {
-			t.Fatalf("function panicked on out-of-bounds linenum: %v", r)
-		}
-	}()
 
 	exec, err := EditfileJob(job)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if exec.Failed {
-		t.Fatalf("execution should not have failed")
-	}
-	if exec.Msg != "ok\n" {
-		t.Fatalf("unexpected message: %q", exec.Msg)
-	}
-	if exec.Output != "File edited correctly" {
-		t.Fatalf("unexpected output: %q", exec.Output)
-	}
-
-	// Verificar que el archivo fue realmente modificado en disco.
-	data, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatalf("failed to read file after edit: %v", err)
-	}
-	lines := strings.Split(string(data), "\n")
-	if lines[98] != "out of bounds" {
-		t.Fatalf("expected line 2 to be %q, got %q", "out of bounds", lines[98])
+	if !exec.Failed {
+		t.Fatalf("execution should have failed when old_string not found")
 	}
 }
