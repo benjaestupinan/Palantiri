@@ -1,0 +1,13 @@
+[Unit]
+Description=Palantiri MCP Extensions Module
+After=network.target
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/mcp_extensions_module.env
+ExecStart=/usr/local/bin/mcp_extensions_module
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
