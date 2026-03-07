@@ -3,3 +3,4 @@
 
 *.env
 *pycache*
+memory_service/deploy_ignored.sh
