@@ -1,9 +1,12 @@
 from brain.JOB_CATALOG import JOB_CATALOG as _catalog
 
+_HIDDEN_FROM_INTENT_CLASSIFIER = {"search_memory", "get_recent_context"}
+
 def _format_catalog():
   lines = []
   for job in _catalog.values():
-    lines.append(f'  - {job["job_id"]}: {job["description"]}')
+    if job["job_id"] not in _HIDDEN_FROM_INTENT_CLASSIFIER:
+      lines.append(f'  - {job["job_id"]}: {job["description"]}')
   return "\n".join(lines)
 
 def get_intent_prompt(user_msg):
@@ -23,8 +26,8 @@ def get_intent_prompt(user_msg):
   No eres un chatbot ni un asistente conversacional.
 
   Tu única función es analizar el mensaje del usuario y clasificarlo
-  según si puede responderse con razonamiento interno del modelo,
-  o si requiere alguna de las capacidades externas disponibles en el sistema.
+  según si puede responderse con razonamiento interno del modelo, o si se puede resolver
+  con ayuda de alguno de los jobs del sistema.
 
   CAPACIDADES EXTERNAS DISPONIBLES (jobs del sistema):
 {_format_catalog()}
@@ -39,15 +42,24 @@ def get_intent_prompt(user_msg):
   - "cuánto es 2 + 3"
   - "explícame qué es un árbol binario"
   - "resume este texto"
+  - "dame ideas para pautas de consultas nutricionales"
+  - "cómo puedo mejorar mi rutina de ejercicios"
+  - "qué es la hipertensión"
+  - "escribime un correo formal"
 
   2) EXTEND_CONTEXT_WITH_SYSTEM_ACTION
-  Responder o ejecutar lo que pide el usuario requiere al menos una
-  de las capacidades externas listadas arriba.
+  El usuario solicita algo que SOLO puede resolverse ejecutando uno de los jobs
+  del catálogo. El match con el job debe ser directo y explícito.
 
-  Ejemplos (basados en el catálogo actual):
-  - "qué hora es" → requiere get_system_date_and_time
-  - "listá los archivos de esta carpeta" → requiere list_working_directory
-  - "creá un archivo llamado notas.txt" → requiere createfile
+  Ejemplos:
+  - "qué hora es" → get_system_date_and_time
+  - "listá los archivos de esta carpeta" → list_working_directory
+  - "creá un archivo llamado notas.txt" → createfile
+  - "¿qué dijimos la última vez?" → get_recent_context
+  - "¿te hablé alguna vez sobre X?" → search_memory
+
+  IMPORTANTE: search_memory y get_recent_context SOLO aplican cuando el usuario
+  pregunta EXPLÍCITAMENTE por conversaciones o memoria pasada, nunca de forma especulativa.
 
   3) END_SESSION
   El usuario se despide, indica que terminó la conversación o que no
@@ -61,9 +73,9 @@ def get_intent_prompt(user_msg):
 
   REGLAS ABSOLUTAS (NO VIOLAR):
 
-  - Clasificá según las capacidades necesarias, no por el tono o wording del mensaje.
-  - Si la respuesta requiere cualquiera de las capacidades del catálogo, es EXTEND_CONTEXT_WITH_SYSTEM_ACTION.
-  - Si el modelo puede responder solo con razonamiento, es COGNITIVE_REQUEST.
+  - El match con un job debe ser DIRECTO y EXPLÍCITO. Si hay duda, es COGNITIVE_REQUEST.
+  - Si el modelo puede responder con razonamiento interno, es COGNITIVE_REQUEST aunque
+    hipotéticamente un job pudiera aportar algo.
   - Nunca inventes categorías adicionales.
 
   FORMATO OBLIGATORIO DE RESPUESTA:

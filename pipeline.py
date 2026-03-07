@@ -20,7 +20,7 @@ def debug_print(string, debug_bool = DEBUG):
 def process_msg(user_msg):
     #step 1 resolve intent
     intent_prompt = IntentRouterPrompt.get_intent_prompt(user_msg)
-    intent_raw = PromptLLM.ask_qwen(intent_prompt)
+    intent_raw = PromptLLM.ask_qwen(intent_prompt, model="qwen2.5:7b-instruct")
 
     intent_obj = json.loads(intent_raw)
     intent = intent_obj["category"]

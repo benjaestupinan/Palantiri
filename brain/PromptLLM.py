@@ -10,13 +10,14 @@ port = os.getenv("OLLAMA_PORT", "11434")
 generate_url = f"http://{host}:{port}/api/generate"
 chat_url = f"http://{host}:{port}/api/chat"
 
-def ask_qwen(prompt): # cache que conviene mas con streaming: false
+def ask_qwen(prompt, model="qwen2.5:3b"): # cache que conviene mas con streaming: false
     """
-    Envía un prompt a qwen2.5:3b (modelo pequeño y rápido).
-    Usado para clasificación de intención y selección de jobs (salida JSON estructurada).
+    Envía un prompt a un modelo qwen para salida JSON estructurada.
+    Usado para clasificación de intención y selección de jobs.
+    Por defecto usa qwen2.5:3b (rápido), acepta un modelo distinto si se necesita mayor precisión.
     """
     payload = {
-        "model": "qwen2.5:3b",
+        "model": model,
         "prompt": prompt,
         "stream": False
     }
