@@ -112,6 +112,12 @@ def get_job_selection_prompt(user_msg):
   Usuario: "lee el archivo /home/user/notas.txt"
   Respuesta: {{"job_id": "readfile", "parameters": {{"path": "/home/user/notas.txt"}}, "confidence": 0.98, "explanation": "acción explícita de lectura con path completo"}}
 
+  Usuario: "explícame el archivo /home/user/main.py"
+  Respuesta: {{"job_id": "readfile", "parameters": {{"path": "/home/user/main.py"}}, "confidence": 0.95, "explanation": "para explicar el archivo es necesario leerlo primero"}}
+
+  Usuario: "resume el contenido de /home/user/notas.txt"
+  Respuesta: {{"job_id": "readfile", "parameters": {{"path": "/home/user/notas.txt"}}, "confidence": 0.95, "explanation": "para resumir el archivo es necesario leerlo primero"}}
+
   Usuario: "crea un archivo llamado ideas.txt en el escritorio"
   Respuesta: {{"job_id": "createfile", "parameters": {{"path": "/home/user/Desktop/ideas.txt"}}, "confidence": 0.85, "explanation": "acción explícita de creación con nombre y ubicación inferida"}}
 

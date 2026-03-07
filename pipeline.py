@@ -49,7 +49,7 @@ def process_msg(user_msg):
     elif intent == "EXTEND_CONTEXT_WITH_SYSTEM_ACTION":
         #step 3b resolve select job
         job_prompt = JobSelectionPrompt.get_job_selection_prompt(user_msg)
-        job = PromptLLM.ask_qwen(job_prompt)
+        job = PromptLLM.ask_qwen(job_prompt, model="qwen2.5:7b-instruct")
         debug_print(f"job_raw: {job}\n---------------")
         job_obj = json.loads(job)
         debug_print(f"job:\n{json.dumps(job_obj, indent=4, ensure_ascii=False)}\n---------------")

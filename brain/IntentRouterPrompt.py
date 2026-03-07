@@ -53,8 +53,10 @@ def get_intent_prompt(user_msg):
 
   Ejemplos:
   - "qué hora es" → get_system_date_and_time
-  - "listá los archivos de esta carpeta" → list_working_directory
-  - "creá un archivo llamado notas.txt" → createfile
+  - "lista los archivos de esta carpeta" → list_working_directory
+  - "crea un archivo llamado notas.txt" → createfile
+  - "explícame el archivo /home/user/main.py" → readfile (para poder explicarlo necesita leerlo primero)
+  - "resume el contenido de notas.txt" → readfile (para resumir necesita leer el archivo)
   - "¿qué dijimos la última vez?" → get_recent_context
   - "¿te hablé alguna vez sobre X?" → search_memory
 
