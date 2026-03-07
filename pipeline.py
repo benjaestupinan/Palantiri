@@ -3,15 +3,22 @@ import json
 from brain import IntentRouterPrompt
 from brain import JobExecutorClient
 from brain import JobSelectionPrompt
+from brain import MCPExtensionsClient
 from brain import MemoryClient
 from brain import MemoryContextPrompt
 from brain import PromptLLM
 from brain import RedactResponsePrompt
 from brain import validator
+from brain.JOB_CATALOG import merge_mcp_catalog
 
 DEBUG = True
 
 session_id = MemoryClient.create_session()
+
+_mcp_catalog = MCPExtensionsClient.get_catalog()
+if _mcp_catalog:
+    merge_mcp_catalog(_mcp_catalog)
+    debug_print(f"MCP catalog merged: {list(_mcp_catalog.keys())}\n---------------")
 
 def debug_print(string, debug_bool = DEBUG):
     if debug_bool:
@@ -20,7 +27,7 @@ def debug_print(string, debug_bool = DEBUG):
 def process_msg(user_msg):
     #step 1 resolve intent
     intent_prompt = IntentRouterPrompt.get_intent_prompt(user_msg)
-    intent_raw = PromptLLM.ask_qwen(intent_prompt, model="qwen2.5:7b-instruct")
+    intent_raw = PromptLLM.ask_qwen(intent_prompt, model="qwen2.5:14b")
 
     intent_obj = json.loads(intent_raw)
     intent = intent_obj["category"]
@@ -49,7 +56,7 @@ def process_msg(user_msg):
     elif intent == "EXTEND_CONTEXT_WITH_SYSTEM_ACTION":
         #step 3b resolve select job
         job_prompt = JobSelectionPrompt.get_job_selection_prompt(user_msg)
-        job = PromptLLM.ask_qwen(job_prompt, model="qwen2.5:7b-instruct")
+        job = PromptLLM.ask_qwen(job_prompt, model="qwen2.5:14b")
         debug_print(f"job_raw: {job}\n---------------")
         job_obj = json.loads(job)
         debug_print(f"job:\n{json.dumps(job_obj, indent=4, ensure_ascii=False)}\n---------------")
@@ -75,8 +82,11 @@ def process_msg(user_msg):
                 return response, intent
             return f"Job invalido, err: {msg}", intent
 
-        #step 6 send job to job_execution_service via http
-        execution_response = JobExecutorClient.execute_job(job_obj)
+        #step 6 route job to the appropriate executor
+        if MCPExtensionsClient.is_mcp_job(job_obj["job_id"]):
+            execution_response = MCPExtensionsClient.execute_mcp_tool(job_obj)
+        else:
+            execution_response = JobExecutorClient.execute_job(job_obj)
         debug_print(f"execution response:\nsuccess: {execution_response['success']} | status: {execution_response['status_code']}\n{execution_response['response_text']}\n---------------")
 
         if not execution_response["success"]:
