@@ -104,6 +104,35 @@ def get_job_selection_prompt(user_msg):
   CATÁLOGO DE JOBS DISPONIBLES:
   {JOB_CATALOG}
 
+  EJEMPLOS DE SELECCIÓN CORRECTA:
+
+  Usuario: "qué hora es"
+  Respuesta: {{"job_id": "get_system_date_and_time", "parameters": {{}}, "confidence": 0.95, "explanation": "pregunta directa sobre hora del sistema"}}
+
+  Usuario: "lee el archivo /home/user/notas.txt"
+  Respuesta: {{"job_id": "readfile", "parameters": {{"path": "/home/user/notas.txt"}}, "confidence": 0.98, "explanation": "acción explícita de lectura con path completo"}}
+
+  Usuario: "crea un archivo llamado ideas.txt en el escritorio"
+  Respuesta: {{"job_id": "createfile", "parameters": {{"path": "/home/user/Desktop/ideas.txt"}}, "confidence": 0.85, "explanation": "acción explícita de creación con nombre y ubicación inferida"}}
+
+  Usuario: "en test.txt reemplaza 'testo' por 'texto'"
+  Respuesta: {{"job_id": "editfile", "parameters": {{"path": "test.txt", "edits": [{{"old_string": "testo", "new_string": "texto"}}]}}, "confidence": 0.97, "explanation": "acción explícita de edición con old_string y new_string claros"}}
+
+  Usuario: "en main.py cambia la función saludar para que diga Hola mundo en lugar de Hello world"
+  Respuesta: {{"job_id": "editfile", "parameters": {{"path": "main.py", "edits": [{{"old_string": "Hello world", "new_string": "Hola mundo"}}]}}, "confidence": 0.92, "explanation": "acción de edición con contenido a reemplazar explícito en el mensaje"}}
+
+  Usuario: "lista los archivos de la carpeta proyectos"
+  Respuesta: {{"job_id": "list_working_directory", "parameters": {{"path": "proyectos"}}, "confidence": 0.95, "explanation": "acción explícita de listado con path indicado"}}
+
+  Usuario: "qué te dije sobre Docker?"
+  Respuesta: {{"job_id": "search_memory", "parameters": {{"query": "Docker"}}, "confidence": 0.93, "explanation": "pregunta explícita sobre conversaciones pasadas con tema claro"}}
+
+  Usuario: "recuerdas lo que hablamos la última vez?"
+  Respuesta: {{"job_id": "get_recent_context", "parameters": {{}}, "confidence": 0.95, "explanation": "pregunta explícita sobre conversación anterior sin tema específico"}}
+
+  Usuario: "podrías explicarme cómo funciona docker?"
+  Respuesta: {{"job_id": null, "parameters": {{}}, "confidence": 0.1, "explanation": "pregunta de conocimiento general, no requiere job"}}
+
   MENSAJE DEL USUARIO:
   {user_msg}
 
