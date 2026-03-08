@@ -8,7 +8,6 @@ import (
 	"os/exec"
 	"sync"
 
-	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -26,6 +25,7 @@ type serversFile struct {
 type ParameterSpec struct {
 	Type        string `json:"type"`
 	Description string `json:"description,omitempty"`
+	Required    bool   `json:"required"`
 }
 
 // CatalogEntry mirrors the JOB_CATALOG entry format expected by the Python client.
@@ -40,7 +40,7 @@ type registeredTool struct {
 	originalName string
 	session      *mcp.ClientSession
 	description  string
-	inputSchema  *jsonschema.Schema
+	inputSchema  any
 }
 
 // Manager holds all active MCP server sessions and their registered tools.
@@ -152,36 +152,55 @@ func (m *Manager) Execute(jobID string, parameters map[string]any) (string, erro
 		return "", fmt.Errorf("calling tool: %w", err)
 	}
 
-	if result.IsError {
-		return "", fmt.Errorf("tool %q returned an error", tool.originalName)
-	}
-
 	var output string
 	for _, content := range result.Content {
 		if tc, ok := content.(*mcp.TextContent); ok {
 			output += tc.Text
 		}
 	}
+	if result.IsError {
+		return "", fmt.Errorf("tool %q error: %s", tool.originalName, output)
+	}
 	return output, nil
 }
 
 // schemaToParams converts a JSON Schema object's properties to ParameterSpec map.
-func schemaToParams(schema *jsonschema.Schema) map[string]ParameterSpec {
+// schema is an any value (typically map[string]any) deserialized from JSON.
+func schemaToParams(schema any) map[string]ParameterSpec {
 	params := make(map[string]ParameterSpec)
-	if schema == nil || schema.Properties == nil {
+	if schema == nil {
 		return params
 	}
-	for propName, propSchema := range schema.Properties {
-		t := propSchema.Type
-		if t == "" && len(propSchema.Types) > 0 {
-			t = propSchema.Types[0]
+	m, ok := schema.(map[string]any)
+	if !ok {
+		return params
+	}
+	props, ok := m["properties"].(map[string]any)
+	if !ok {
+		return params
+	}
+	required := map[string]bool{}
+	if reqList, ok := m["required"].([]any); ok {
+		for _, r := range reqList {
+			if s, ok := r.(string); ok {
+				required[s] = true
+			}
 		}
+	}
+	for propName, propVal := range props {
+		propMap, ok := propVal.(map[string]any)
+		if !ok {
+			continue
+		}
+		t, _ := propMap["type"].(string)
 		if t == "" {
 			t = "string"
 		}
+		desc, _ := propMap["description"].(string)
 		params[propName] = ParameterSpec{
 			Type:        t,
-			Description: propSchema.Description,
+			Description: desc,
+			Required:    required[propName],
 		}
 	}
 	return params
