@@ -13,16 +13,17 @@ from brain.JOB_CATALOG import merge_mcp_catalog
 
 DEBUG = True
 
+def debug_print(string, debug_bool = DEBUG):
+    if debug_bool:
+        print(string)
+
+
 session_id = MemoryClient.create_session()
 
 _mcp_catalog = MCPExtensionsClient.get_catalog()
 if _mcp_catalog:
     merge_mcp_catalog(_mcp_catalog)
     debug_print(f"MCP catalog merged: {list(_mcp_catalog.keys())}\n---------------")
-
-def debug_print(string, debug_bool = DEBUG):
-    if debug_bool:
-        print(string)
 
 def process_msg(user_msg):
     #step 1 resolve intent
