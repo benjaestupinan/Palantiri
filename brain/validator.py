@@ -66,7 +66,9 @@ def validate_job(job):
 
     for param_name, param_spec in job_params.items():
         if param_name not in given_params:
-            return False, f"Missing parameter {param_name}"
+            if param_spec.get("required", True):
+                return False, f"Missing parameter {param_name}"
+            continue
 
         valid, msg = validate_value(given_params[param_name], param_spec, param_name)
         if not valid:
