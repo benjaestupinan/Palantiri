@@ -5,7 +5,6 @@ from brain import JobExecutorClient
 from brain import JobSelectionPrompt
 from brain import MCPExtensionsClient
 from brain import MemoryClient
-from brain import MemoryContextPrompt
 from brain import PromptLLM
 from brain import RedactResponsePrompt
 from brain import validator
