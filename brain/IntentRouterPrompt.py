@@ -6,8 +6,11 @@ def _format_catalog():
   lines = []
   for job in _catalog.values():
     if job["job_id"] not in _HIDDEN_FROM_INTENT_CLASSIFIER:
-      lines.append(f'  - {job["job_id"]}: {job["description"]}')
+      lines.append(f'  - {job["job_id"]} [{job.get("category", "")}]: {job["description"]}')
   return "\n".join(lines)
+
+def _get_categories():
+  return {job.get("category") for job in _catalog.values() if job.get("category")}
 
 def get_intent_prompt(user_msg):
   """
@@ -87,9 +90,15 @@ def get_intent_prompt(user_msg):
 
   { "{" }
     "category": "COGNITIVE_REQUEST | EXTEND_CONTEXT_WITH_SYSTEM_ACTION | END_SESSION",
+    "job_category": "categoría del job requerido | null",
     "confidence": number entre 0 y 1,
     "explanation": "explicación breve y objetiva del criterio aplicado"
   { "}" }
+
+  REGLAS PARA job_category:
+  - Solo se completa cuando category es EXTEND_CONTEXT_WITH_SYSTEM_ACTION.
+  - Debe ser EXACTAMENTE una de las categorías disponibles: {_get_categories()}
+  - En cualquier otro caso, job_category debe ser null.
 
   MENSAJE DEL USUARIO:
   {user_msg}

@@ -2,7 +2,13 @@
   "mcpServers": {
     "fetch": {
       "command": "uvx",
-      "args": ["mcp-server-fetch"]
+      "args": ["mcp-server-fetch"],
+      "category": "web_fetch"
+    },
+    "spotify": {
+      "command": "node",
+      "args": ["/home/dofoam/mcp_server_dependencies/spotify-mcp-server/build/index.js"],
+      "category": "music_player"
     }
   }
 }

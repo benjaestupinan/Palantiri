@@ -13,7 +13,7 @@ from brain import MemoryClient
 from brain import PromptLLM
 from brain import RedactResponsePrompt
 from brain import validator
-from brain.JOB_CATALOG import merge_mcp_catalog
+from brain.JOB_CATALOG import JOB_CATALOG, merge_mcp_catalog
 
 os.makedirs("logs", exist_ok=True)
 _handler = RotatingFileHandler("logs/pipeline.log", maxBytes=5_000_000, backupCount=3)
@@ -56,8 +56,10 @@ class Pipeline:
             t = time.perf_counter()
             intent_prompt = IntentRouterPrompt.get_intent_prompt(user_msg)
             intent_raw = PromptLLM.ask_qwen(intent_prompt, model="qwen2.5:14b")
-            intent = json.loads(intent_raw)["category"]
-            flow["steps"].append({"step": "intent", "ms": _ms(t), "intent": intent})
+            intent_obj = json.loads(intent_raw)
+            intent = intent_obj["category"]
+            job_category = intent_obj.get("job_category")
+            flow["steps"].append({"step": "intent", "ms": _ms(t), "intent": intent, "job_category": job_category})
 
             # END_SESSION
             if intent == "END_SESSION":
@@ -84,7 +86,14 @@ class Pipeline:
             # EXTEND_CONTEXT_WITH_SYSTEM_ACTION
             elif intent == "EXTEND_CONTEXT_WITH_SYSTEM_ACTION":
                 t = time.perf_counter()
-                job_prompt = JobSelectionPrompt.get_job_selection_prompt(user_msg)
+                if job_category:
+                    filtered_catalog = {}
+                    for k, v in JOB_CATALOG.items():
+                        if v.get("category") == job_category:
+                            filtered_catalog[k] = v
+                else:
+                    filtered_catalog = JOB_CATALOG
+                job_prompt = JobSelectionPrompt.get_job_selection_prompt(user_msg, catalog=filtered_catalog)
                 job_obj = json.loads(PromptLLM.ask_qwen(job_prompt, model="qwen2.5:14b"))
                 flow["steps"].append({"step": "job_selection", "ms": _ms(t), "job": job_obj})
 

@@ -1,7 +1,9 @@
 from .JOB_CATALOG import JOB_CATALOG
 
 
-def get_job_selection_prompt(user_msg):
+def get_job_selection_prompt(user_msg, catalog=None):
+  if catalog is None:
+    catalog = JOB_CATALOG
   """
   Construye el prompt para seleccionar un job del JOB_CATALOG.
 
@@ -94,7 +96,7 @@ def get_job_selection_prompt(user_msg):
       (ej: "acción explícita con retraso temporal convertido a segundos").
   
   JOB_IDS VÁLIDOS (lista exhaustiva y definitiva):
-  {list(JOB_CATALOG.keys())}
+  {list(catalog.keys())}
 
   ESTA ES LA ÚNICA LISTA DE JOB_IDS PERMITIDOS.
   Si el job_id que necesitarías usar no aparece EXACTAMENTE en esa lista,
@@ -102,7 +104,7 @@ def get_job_selection_prompt(user_msg):
   Un job_id "similar", "aproximado" o "inferido" NO es válido.
 
   CATÁLOGO DE JOBS DISPONIBLES:
-  {JOB_CATALOG}
+  {catalog}
 
   EJEMPLOS DE SELECCIÓN CORRECTA:
 
