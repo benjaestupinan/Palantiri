@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 EnvironmentFile=/etc/mcp_extensions_module.env
-Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/dofoam/.local/bin"
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/dofoam/.local/bin:/home/dofoam/.nvm/versions/node/v24.14.0/bin"
 ExecStart=/usr/local/bin/mcp_extensions_module
 Restart=on-failure
 RestartSec=5
