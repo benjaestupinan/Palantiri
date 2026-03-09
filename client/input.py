@@ -1,5 +1,5 @@
 def get_input() -> str:
-    return input("vos: ")
+    return input("msg: ")
 
 
 def get_feedback() -> bool:
