@@ -30,8 +30,8 @@ class Pipeline:
         if mcp_catalog:
             merge_mcp_catalog(mcp_catalog)
 
-    def process_message(self, client_session_id: str | None, user_msg: str) -> tuple[str | None, str]:
-        """Returns (client_session_id, text_response).
+    def process_message(self, client_session_id: str | None, user_msg: str) -> tuple[str | None, str, str]:
+        """Returns (client_session_id, text_response, flow_id).
         Returns None as session_id when the session ends.
         """
         if client_session_id is None or client_session_id not in self._sessions:
@@ -67,7 +67,7 @@ class Pipeline:
                 flow["steps"].append({"step": "chatty_farewell", "ms": _ms(t), "response": response})
                 flow["intent"] = intent
                 flow["success"] = True
-                return None, response
+                return None, response, flow["flow_id"]
 
             # COGNITIVE_REQUEST
             if intent == "COGNITIVE_REQUEST":
@@ -79,7 +79,7 @@ class Pipeline:
                 MemoryClient.save_message(memory_session_id, "assistant", response)
                 flow["intent"] = intent
                 flow["success"] = True
-                return client_session_id, response
+                return client_session_id, response, flow["flow_id"]
 
             # EXTEND_CONTEXT_WITH_SYSTEM_ACTION
             elif intent == "EXTEND_CONTEXT_WITH_SYSTEM_ACTION":
@@ -96,7 +96,7 @@ class Pipeline:
                     MemoryClient.save_message(memory_session_id, "assistant", response)
                     flow["intent"] = intent
                     flow["success"] = True
-                    return client_session_id, response
+                    return client_session_id, response, flow["flow_id"]
 
                 t = time.perf_counter()
                 valid, msg = validator.validate_job(job_obj)
@@ -111,10 +111,10 @@ class Pipeline:
                         MemoryClient.save_message(memory_session_id, "assistant", response)
                         flow["intent"] = intent
                         flow["success"] = True
-                        return client_session_id, response
+                        return client_session_id, response, flow["flow_id"]
                     flow["intent"] = intent
                     flow["error"] = f"Job invalido: {msg}"
-                    return client_session_id, f"Job invalido: {msg}"
+                    return client_session_id, f"Job invalido: {msg}", flow["flow_id"]
 
                 t = time.perf_counter()
                 if MCPExtensionsClient.is_mcp_job(job_obj["job_id"]):
@@ -133,7 +133,7 @@ class Pipeline:
                 if not execution_response["success"]:
                     flow["intent"] = intent
                     flow["error"] = execution_response["response_text"]
-                    return client_session_id, execution_response["response_text"]
+                    return client_session_id, execution_response["response_text"], flow["flow_id"]
 
                 t = time.perf_counter()
                 ret_msg_prompt = RedactResponsePrompt.get_response_message_prompt(user_msg, execution_response["response_text"])
@@ -143,7 +143,7 @@ class Pipeline:
                 MemoryClient.save_message(memory_session_id, "assistant", ret_msg)
                 flow["intent"] = intent
                 flow["success"] = True
-                return client_session_id, ret_msg
+                return client_session_id, ret_msg, flow["flow_id"]
 
         except Exception as e:
             flow["error"] = str(e)
