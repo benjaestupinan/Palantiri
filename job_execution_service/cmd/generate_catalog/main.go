@@ -95,6 +95,13 @@ func main() {
 
 		jobID := filepath.Base(filepath.Dir(path))
 
+		relDir, _ := filepath.Rel(jobsDir, filepath.Dir(path))
+		parts := strings.Split(filepath.ToSlash(relDir), "/")
+		category := jobID
+		if len(parts) >= 2 {
+			category = parts[0]
+		}
+
 		content, err := os.ReadFile(path)
 		if err != nil {
 			return fmt.Errorf("reading %s: %w", path, err)
@@ -108,6 +115,7 @@ func main() {
 			job = make(map[string]interface{})
 		}
 		job["job_id"] = jobID
+		job["category"] = category
 
 		existingParams, _ := job["parameters"].(map[string]interface{})
 		if existingParams == nil {
@@ -119,10 +127,15 @@ func main() {
 			goType := strings.TrimSpace(string(match[2]))
 			schema := buildParamSchema(goType, structs)
 
-			// Preserve existing description if present
+			// Preserve existing description and items if present
 			if existing, ok := existingParams[paramName].(map[string]interface{}); ok {
 				if desc, ok := existing["description"]; ok {
 					schema["description"] = desc
+				}
+				if _, hasItems := schema["items"]; !hasItems {
+					if items, ok := existing["items"]; ok {
+						schema["items"] = items
+					}
 				}
 			}
 			existingParams[paramName] = schema
