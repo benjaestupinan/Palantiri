@@ -12,9 +12,10 @@ import (
 )
 
 type serverConfig struct {
-	Command string            `json:"command"`
-	Args    []string          `json:"args"`
-	Env     map[string]string `json:"env,omitempty"`
+	Command  string            `json:"command"`
+	Args     []string          `json:"args"`
+	Env      map[string]string `json:"env,omitempty"`
+	Category string            `json:"category,omitempty"`
 }
 
 type serversFile struct {
@@ -31,6 +32,7 @@ type ParameterSpec struct {
 // CatalogEntry mirrors the JOB_CATALOG entry format expected by the Python client.
 type CatalogEntry struct {
 	JobID       string                   `json:"job_id"`
+	Category    string                   `json:"category,omitempty"`
 	Description string                   `json:"description"`
 	Parameters  map[string]ParameterSpec `json:"parameters"`
 }
@@ -38,6 +40,7 @@ type CatalogEntry struct {
 type registeredTool struct {
 	serverName   string
 	originalName string
+	category     string
 	session      *mcp.ClientSession
 	description  string
 	inputSchema  any
@@ -109,6 +112,7 @@ func (m *Manager) connectServer(name string, cfg serverConfig) error {
 		m.tools[jobID] = &registeredTool{
 			serverName:   name,
 			originalName: tool.Name,
+			category:     cfg.Category,
 			session:      session,
 			description:  tool.Description,
 			inputSchema:  tool.InputSchema,
@@ -127,6 +131,7 @@ func (m *Manager) Catalog() map[string]CatalogEntry {
 	for jobID, tool := range m.tools {
 		catalog[jobID] = CatalogEntry{
 			JobID:       jobID,
+			Category:    tool.category,
 			Description: tool.description,
 			Parameters:  schemaToParams(tool.inputSchema),
 		}
