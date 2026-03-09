@@ -1,0 +1,15 @@
+[Unit]
+Description=Palantiri Pipeline Service
+After=network.target
+
+[Service]
+Type=simple
+User=dofoam
+WorkingDirectory=/home/dofoam/Palantiri
+Environment="PATH=/home/dofoam/Palantiri/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/home/dofoam/Palantiri/venv/bin/python -m pipeline_service.server
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
