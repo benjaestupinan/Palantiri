@@ -1,5 +1,6 @@
 {
     "createfile": {
+        "category": "filesystem",
         "description": "Crea un archivo vacío en el path indicado.",
         "job_id": "createfile",
         "parameters": {
@@ -10,6 +11,7 @@
         }
     },
     "echo": {
+        "category": "echo",
         "description": "Devuelve exactamente el mensaje entregado, sin modificaciones.",
         "job_id": "echo",
         "parameters": {
@@ -20,38 +22,47 @@
         }
     },
     "editfile": {
+        "category": "filesystem",
         "description": "Edita el archivo reemplazando fragmentos exactos de texto.",
         "job_id": "editfile",
         "parameters": {
-            "path": {
-                "description": "Ruta del archivo a editar.",
-                "type": "string"
-            },
             "edits": {
                 "description": "Lista de ediciones a aplicar. Cada edición reemplaza old_string por new_string.",
-                "type": "array",
                 "items": {
-                    "type": "object",
                     "properties": {
-                        "old_string": {
-                            "description": "Fragmento exacto del archivo a reemplazar.",
-                            "type": "string"
-                        },
                         "new_string": {
                             "description": "Nuevo contenido que reemplaza a old_string.",
                             "type": "string"
+                        },
+                        "old_string": {
+                            "description": "Fragmento exacto del archivo a reemplazar.",
+                            "type": "string"
                         }
-                    }
-                }
+                    },
+                    "type": "object"
+                },
+                "type": "array"
+            },
+            "path": {
+                "description": "Ruta del archivo a editar.",
+                "type": "string"
             }
         }
     },
+    "get_recent_context": {
+        "category": "memory",
+        "description": "Recupera los mensajes más recientes de conversaciones anteriores.",
+        "job_id": "get_recent_context",
+        "parameters": {}
+    },
     "get_system_date_and_time": {
+        "category": "get_system_date_and_time",
         "description": "Obtiene la fecha y hora actual del sistema.",
         "job_id": "get_system_date_and_time",
         "parameters": {}
     },
     "list_working_directory": {
+        "category": "filesystem",
         "description": "Lista los archivos y directorios dentro del path indicado.",
         "job_id": "list_working_directory",
         "parameters": {
@@ -62,6 +73,7 @@
         }
     },
     "readfile": {
+        "category": "filesystem",
         "description": "Lee y devuelve el contenido de un archivo (máximo 100KB).",
         "job_id": "readfile",
         "parameters": {
@@ -72,6 +84,7 @@
         }
     },
     "search_memory": {
+        "category": "memory",
         "description": "Busca en el historial de conversaciones pasadas por una palabra clave o tema.",
         "job_id": "search_memory",
         "parameters": {
@@ -80,10 +93,5 @@
                 "type": "string"
             }
         }
-    },
-    "get_recent_context": {
-        "description": "Recupera los mensajes más recientes de conversaciones anteriores.",
-        "job_id": "get_recent_context",
-        "parameters": {}
     }
 }
