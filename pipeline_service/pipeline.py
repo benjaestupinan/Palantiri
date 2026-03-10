@@ -5,8 +5,9 @@ import time
 import uuid
 from logging.handlers import RotatingFileHandler
 
-from brain import CombinedRouterPrompt
+from brain import IntentRouterPrompt
 from brain import JobExecutorClient
+from brain import JobSelectionPrompt
 from brain import MCPExtensionsClient
 from brain import MemoryClient
 from brain import ParameterExtractionPrompt
@@ -53,13 +54,14 @@ class Pipeline:
         flow_start = time.perf_counter()
 
         try:
-            # step 1: intent + job selection en una sola llamada
+            # step 1 resolve intent
             t = time.perf_counter()
-            combined_prompt = CombinedRouterPrompt.get_combined_prompt(user_msg, catalog=JOB_CATALOG)
-            combined_raw = PromptLLM.ask_qwen(combined_prompt, model="qwen2.5:14b")
-            combined_obj = json.loads(combined_raw)
-            intent = combined_obj["category"]
-            flow["steps"].append({"step": "intent_and_job", "ms": _ms(t), "result": combined_obj})
+            intent_prompt = IntentRouterPrompt.get_intent_prompt(user_msg)
+            intent_raw = PromptLLM.ask_qwen(intent_prompt, model="qwen2.5:14b")
+            intent_obj = json.loads(intent_raw)
+            intent = intent_obj["category"]
+            job_category = intent_obj.get("job_category")
+            flow["steps"].append({"step": "intent", "ms": _ms(t), "intent": intent, "job_category": job_category})
 
             # END_SESSION
             if intent == "END_SESSION":
@@ -85,13 +87,17 @@ class Pipeline:
 
             # EXTEND_CONTEXT_WITH_SYSTEM_ACTION
             elif intent == "EXTEND_CONTEXT_WITH_SYSTEM_ACTION":
-                filtered_catalog = JOB_CATALOG
-                job_obj = {
-                    "job_id": combined_obj.get("job_id"),
-                    "parameters": combined_obj.get("parameters", {}),
-                    "confidence": combined_obj.get("confidence"),
-                    "explanation": combined_obj.get("explanation"),
-                }
+                t = time.perf_counter()
+                if job_category:
+                    filtered_catalog = {}
+                    for k, v in JOB_CATALOG.items():
+                        if v.get("category") == job_category:
+                            filtered_catalog[k] = v
+                else:
+                    filtered_catalog = JOB_CATALOG
+                job_prompt = JobSelectionPrompt.get_job_selection_prompt(user_msg, catalog=filtered_catalog)
+                job_obj = json.loads(PromptLLM.ask_qwen(job_prompt, model="qwen2.5:14b"))
+                flow["steps"].append({"step": "job_selection", "ms": _ms(t), "job": job_obj})
 
                 if job_obj.get("job_id") is None:
                     t = time.perf_counter()
