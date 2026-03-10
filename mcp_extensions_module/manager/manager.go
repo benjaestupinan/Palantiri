@@ -48,12 +48,14 @@ type registeredTool struct {
 
 // Manager holds all active MCP server sessions and their registered tools.
 type Manager struct {
-	mu    sync.RWMutex
-	tools map[string]*registeredTool // jobID → tool
+	mu      sync.RWMutex
+	tools   map[string]*registeredTool // jobID → tool
+	servers map[string]serverConfig    // serverName → config (for reconnection)
 }
 
 var Global = &Manager{
-	tools: make(map[string]*registeredTool),
+	tools:   make(map[string]*registeredTool),
+	servers: make(map[string]serverConfig),
 }
 
 // Init reads mcp_servers.json and connects to all configured MCP servers.
@@ -69,6 +71,10 @@ func (m *Manager) Init(configPath string) error {
 	}
 
 	for name, srv := range cfg.MCPServers {
+		m.mu.Lock()
+		m.servers[name] = srv
+		m.mu.Unlock()
+
 		if err := m.connectServer(name, srv); err != nil {
 			fmt.Printf("[manager] failed to connect to server %q: %v\n", name, err)
 		}
@@ -122,6 +128,27 @@ func (m *Manager) connectServer(name string, cfg serverConfig) error {
 	return nil
 }
 
+// reconnectServer removes all tools for the given server and reconnects.
+func (m *Manager) reconnectServer(name string) error {
+	m.mu.RLock()
+	cfg, ok := m.servers[name]
+	m.mu.RUnlock()
+	if !ok {
+		return fmt.Errorf("no config stored for server %q", name)
+	}
+
+	m.mu.Lock()
+	for jobID, tool := range m.tools {
+		if tool.serverName == name {
+			delete(m.tools, jobID)
+		}
+	}
+	m.mu.Unlock()
+
+	fmt.Printf("[manager] reconnecting server %q\n", name)
+	return m.connectServer(name, cfg)
+}
+
 // Catalog returns all registered MCP tools as JOB_CATALOG-compatible entries.
 func (m *Manager) Catalog() map[string]CatalogEntry {
 	m.mu.RLock()
@@ -140,7 +167,28 @@ func (m *Manager) Catalog() map[string]CatalogEntry {
 }
 
 // Execute calls an MCP tool and returns its text output.
+// If the call fails, it attempts to reconnect the server and retry once.
 func (m *Manager) Execute(jobID string, parameters map[string]any) (string, error) {
+	output, err := m.callTool(jobID, parameters)
+	if err != nil {
+		m.mu.RLock()
+		tool, ok := m.tools[jobID]
+		m.mu.RUnlock()
+
+		if ok {
+			serverName := tool.serverName
+			fmt.Printf("[manager] tool call failed for %q, reconnecting server %q: %v\n", jobID, serverName, err)
+			if reconnErr := m.reconnectServer(serverName); reconnErr != nil {
+				return "", fmt.Errorf("calling tool: %w (reconnect failed: %v)", err, reconnErr)
+			}
+			return m.callTool(jobID, parameters)
+		}
+		return "", err
+	}
+	return output, nil
+}
+
+func (m *Manager) callTool(jobID string, parameters map[string]any) (string, error) {
 	m.mu.RLock()
 	tool, ok := m.tools[jobID]
 	m.mu.RUnlock()
