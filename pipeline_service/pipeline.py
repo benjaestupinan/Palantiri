@@ -10,6 +10,8 @@ from brain import JobExecutorClient
 from brain import JobSelectionPrompt
 from brain import MCPExtensionsClient
 from brain import MemoryClient
+from brain import ParameterExtractionPrompt
+from brain import PrerequisiteJobPrompt
 from brain import PromptLLM
 from brain import RedactResponsePrompt
 from brain import validator
@@ -125,19 +127,72 @@ class Pipeline:
                     flow["error"] = f"Job invalido: {msg}"
                     return client_session_id, f"Job invalido: {msg}", flow["flow_id"]
 
-                t = time.perf_counter()
-                if MCPExtensionsClient.is_mcp_job(job_obj["job_id"]):
-                    execution_response = MCPExtensionsClient.execute_mcp_tool(job_obj)
-                else:
-                    execution_response = JobExecutorClient.execute_job(job_obj)
-                flow["steps"].append({
-                    "step": "job_execution",
-                    "ms": _ms(t),
-                    "job_id": job_obj["job_id"],
-                    "success": execution_response["success"],
-                    "status_code": execution_response["status_code"],
-                    "response": execution_response["response_text"],
-                })
+                MAX_CHAIN_DEPTH = 3
+                for chain_depth in range(MAX_CHAIN_DEPTH):
+                    t = time.perf_counter()
+                    if MCPExtensionsClient.is_mcp_job(job_obj["job_id"]):
+                        execution_response = MCPExtensionsClient.execute_mcp_tool(job_obj)
+                    else:
+                        execution_response = JobExecutorClient.execute_job(job_obj)
+                    flow["steps"].append({
+                        "step": "job_execution",
+                        "ms": _ms(t),
+                        "job_id": job_obj["job_id"],
+                        "chain_depth": chain_depth,
+                        "success": execution_response["success"],
+                        "status_code": execution_response["status_code"],
+                        "response": execution_response["response_text"],
+                    })
+
+                    if execution_response["success"]:
+                        break
+
+                    if chain_depth == MAX_CHAIN_DEPTH - 1:
+                        flow["intent"] = intent
+                        flow["error"] = execution_response["response_text"]
+                        return client_session_id, execution_response["response_text"], flow["flow_id"]
+
+                    # seleccionar job prerequisito
+                    t = time.perf_counter()
+                    prereq_prompt = PrerequisiteJobPrompt.get_prerequisite_job_prompt(
+                        job_obj, execution_response["response_text"], user_msg, catalog=filtered_catalog
+                    )
+                    prereq_obj = json.loads(PromptLLM.ask_qwen(prereq_prompt, model="qwen2.5:14b"))
+                    flow["steps"].append({"step": "prerequisite_selection", "ms": _ms(t), "job": prereq_obj})
+
+                    if prereq_obj.get("job_id") is None:
+                        flow["intent"] = intent
+                        flow["error"] = execution_response["response_text"]
+                        return client_session_id, execution_response["response_text"], flow["flow_id"]
+
+                    # ejecutar prerequisito
+                    t = time.perf_counter()
+                    if MCPExtensionsClient.is_mcp_job(prereq_obj["job_id"]):
+                        prereq_response = MCPExtensionsClient.execute_mcp_tool(prereq_obj)
+                    else:
+                        prereq_response = JobExecutorClient.execute_job(prereq_obj)
+                    flow["steps"].append({
+                        "step": "prerequisite_execution",
+                        "ms": _ms(t),
+                        "job_id": prereq_obj["job_id"],
+                        "success": prereq_response["success"],
+                        "response": prereq_response["response_text"],
+                    })
+
+                    if not prereq_response["success"]:
+                        flow["intent"] = intent
+                        flow["error"] = prereq_response["response_text"]
+                        return client_session_id, prereq_response["response_text"], flow["flow_id"]
+
+                    # extraer parámetros del resultado del prerequisito
+                    t = time.perf_counter()
+                    extract_prompt = ParameterExtractionPrompt.get_parameter_extraction_prompt(
+                        job_obj, prereq_response["response_text"]
+                    )
+                    extracted = json.loads(PromptLLM.ask_qwen(extract_prompt, model="qwen2.5:14b"))
+                    flow["steps"].append({"step": "parameter_extraction", "ms": _ms(t), "extracted": extracted})
+
+                    job_obj["parameters"].update(extracted.get("parameters", {}))
 
                 if not execution_response["success"]:
                     flow["intent"] = intent

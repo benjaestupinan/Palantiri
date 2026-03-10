@@ -32,8 +32,12 @@ def get_job_selection_prompt(user_msg, catalog=None):
   Un job puede ser seleccionado SOLO si:
   - el mensaje expresa explícitamente una acción
   - el resultado solicitado puede obtenerse con uno o más jobs del catálogo
-  - todos los parámetros requeridos pueden obtenerse explícitamente del mensaje
-    o mediante inferencias permitidas definidas en esta prompt
+  - los parámetros requeridos pueden obtenerse del mensaje O pueden ser resueltos
+    por otro job del catálogo (el sistema resolverá los parámetros faltantes automáticamente)
+
+  IMPORTANTE: si la acción es clara pero faltan parámetros que otro job podría proveer
+  (por ejemplo, un ID o URI que requiere una búsqueda previa), seleccioná el job igualmente
+  con los parámetros disponibles y dejá los faltantes vacíos.
   
   TIPOS DE JOBS:
   - Jobs primitivos: ejecutan una acción directa.
