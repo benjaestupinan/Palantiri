@@ -45,10 +45,12 @@ def execute_mcp_tool(job: dict) -> dict:
             json={"job_id": job["job_id"], "parameters": job.get("parameters", {})},
             timeout=30,
         )
+        response_text = response.text.strip()
+        is_error = response.status_code != 200 or response_text.startswith("Error:")
         return {
-            "success": response.status_code == 200,
+            "success": not is_error,
             "status_code": response.status_code,
-            "response_text": response.text.strip(),
+            "response_text": response_text,
         }
     except Exception as e:
         print(f"[MCPExtensionsClient] execute_mcp_tool failed: {e}")
