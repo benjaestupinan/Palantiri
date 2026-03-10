@@ -187,7 +187,7 @@ class Pipeline:
                     # extraer parámetros del resultado del prerequisito
                     t = time.perf_counter()
                     extract_prompt = ParameterExtractionPrompt.get_parameter_extraction_prompt(
-                        job_obj, prereq_response["response_text"]
+                        job_obj, prereq_response["response_text"], catalog=filtered_catalog
                     )
                     extracted = json.loads(PromptLLM.ask_qwen(extract_prompt, model="qwen2.5:14b"))
                     flow["steps"].append({"step": "parameter_extraction", "ms": _ms(t), "extracted": extracted})
