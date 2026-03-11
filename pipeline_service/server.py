@@ -11,7 +11,7 @@ from pipeline_service.tts import synthesize
 app = Flask(__name__)
 _pipeline = Pipeline()
 
-_feedback_handler = RotatingFileHandler("logs/pipeline.log", maxBytes=5_000_000, backupCount=3)
+_feedback_handler = RotatingFileHandler("logs/pipeline.log", maxBytes=1_000_000_000, backupCount=3)
 _feedback_logger = logging.getLogger("feedback")
 _feedback_logger.addHandler(_feedback_handler)
 _feedback_logger.setLevel(logging.INFO)
