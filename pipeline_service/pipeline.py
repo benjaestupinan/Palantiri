@@ -57,7 +57,7 @@ class Pipeline:
             # step 1 resolve intent
             t = time.perf_counter()
             intent_prompt = IntentRouterPrompt.get_intent_prompt(user_msg)
-            intent_raw = PromptLLM.ask_model(intent_prompt, model="qwen2.5:3b")
+            intent_raw = PromptLLM.ask_model(intent_prompt)
             intent_obj = json.loads(intent_raw)
             intent = intent_obj["category"]
             job_category = intent_obj.get("job_category")
@@ -96,7 +96,7 @@ class Pipeline:
                 else:
                     filtered_catalog = JOB_CATALOG
                 job_prompt = JobSelectionPrompt.get_job_selection_prompt(user_msg, catalog=filtered_catalog)
-                job_obj = json.loads(PromptLLM.ask_model(job_prompt, model="qwen2.5:3b"))
+                job_obj = json.loads(PromptLLM.ask_model(job_prompt))
                 flow["steps"].append({"step": "job_selection", "ms": _ms(t), "job": job_obj})
 
                 if job_obj.get("job_id") is None:
@@ -157,7 +157,7 @@ class Pipeline:
                     prereq_prompt = PrerequisiteJobPrompt.get_prerequisite_job_prompt(
                         job_obj, execution_response["response_text"], user_msg, catalog=filtered_catalog
                     )
-                    prereq_obj = json.loads(PromptLLM.ask_model(prereq_prompt, model="qwen2.5:14b"))
+                    prereq_obj = json.loads(PromptLLM.ask_model(prereq_prompt))
                     flow["steps"].append({"step": "prerequisite_selection", "ms": _ms(t), "job": prereq_obj})
 
                     if prereq_obj.get("job_id") is None:
@@ -189,7 +189,7 @@ class Pipeline:
                     extract_prompt = ParameterExtractionPrompt.get_parameter_extraction_prompt(
                         job_obj, prereq_response["response_text"], catalog=filtered_catalog
                     )
-                    extracted = json.loads(PromptLLM.ask_model(extract_prompt, model="qwen2.5:14b"))
+                    extracted = json.loads(PromptLLM.ask_model(extract_prompt))
                     flow["steps"].append({"step": "parameter_extraction", "ms": _ms(t), "extracted": extracted})
 
                     job_obj["parameters"].update(extracted.get("parameters", {}))
