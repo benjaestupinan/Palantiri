@@ -26,6 +26,14 @@ def ask_qwen(prompt, model="qwen2.5:3b"): # cache que conviene mas con streaming
     data = response.json()
     return data["response"]
 
+def ask_model(prompt, model="qwen2.5:14b"):
+    """
+    Alias de ask_qwen usado por pipeline_service para las tareas de
+    clasificación estructurada (intent, job selection, prerequisitos,
+    extracción de parámetros). Por defecto usa qwen2.5:14b.
+    """
+    return ask_qwen(prompt, model=model)
+
 def ask_chatty(prompt, history=None, system_prompt=None): # aqui puede ser mejor streaming: true
     """
     Envía un prompt a qwen2.5:7b-instruct (modelo conversacional).
